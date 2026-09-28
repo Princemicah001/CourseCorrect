@@ -129,8 +129,22 @@ function send(response, status, body, contentType = 'application/json; charset=u
 }
 
 async function readBody(request) {
+    if (request.body !== undefined && request.body !== null) {
+        if (typeof request.body === 'object') return request.body;
+        if (typeof request.body === 'string') {
+            try { return JSON.parse(request.body); } catch {}
+            try {
+                const params = new URLSearchParams(request.body);
+                const obj = {};
+                for (const [k, v] of params.entries()) obj[k] = v;
+                return obj;
+            } catch { return {}; }
+        }
+    }
     let body = '';
-    for await (const chunk of request) body += chunk;
+    try {
+        for await (const chunk of request) body += chunk;
+    } catch {}
     if (!body) return {};
     try {
         return JSON.parse(body);
@@ -493,17 +507,37 @@ async function handleRequest(request, response) {
     try {
         const requestUrl = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
         let pathname = requestUrl.pathname;
-        // On Vercel, if route was rewritten to /api/index.js, restore actual path
-        if (pathname === '/api/index.js' || pathname === '/api' || pathname === '/api/') {
-            const matched = request.headers['x-matched-path'] || request.headers['x-invoke-path'] || request.headers['x-forwarded-uri'];
-            if (matched && matched.startsWith('/api/')) {
-                pathname = matched.split('?')[0];
+
+        // Vercel serverless catch-all & query slug resolution
+        if (request.query && request.query.slug) {
+            const slugPath = Array.isArray(request.query.slug) ? request.query.slug.join('/') : request.query.slug;
+            pathname = `/api/${slugPath}`;
+        } else if (pathname === '/api/index.js' || pathname === '/api' || pathname === '/api/') {
+            const raw = request.headers['x-matched-path'] ||
+                        request.headers['x-invoke-path'] ||
+                        request.headers['x-forwarded-uri'] ||
+                        request.headers['x-real-url'] ||
+                        request.headers['x-original-url'];
+            if (raw && raw.startsWith('/api/') && !raw.startsWith('/api/index')) {
+                pathname = raw.split('?')[0];
+            } else if (pathname === '/api' || pathname === '/api/') {
+                pathname = '/api/materials';
             }
         }
+
         const method = request.method;
 
         if (method === 'OPTIONS') {
             return send(response, 204, '');
+        }
+
+        // Favicon handler
+        if (pathname === '/favicon.ico') {
+            response.writeHead(204, {
+                'Content-Type': 'image/x-icon',
+                'Cache-Control': 'public, max-age=86400'
+            });
+            return response.end();
         }
 
         // SSE stream
@@ -511,11 +545,15 @@ async function handleRequest(request, response) {
             if (method !== 'GET') return send(response, 405, { error: 'Method not allowed' });
             response.writeHead(200, {
                 'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
+                'Cache-Control': 'no-cache, no-transform',
                 Connection: 'keep-alive',
                 'Access-Control-Allow-Origin': '*'
             });
             response.write('event: connected\ndata: {"status":"connected"}\n\n');
+            if (process.env.VERCEL) {
+                // Serverless lambdas terminate after execution; end stream gracefully
+                return response.end();
+            }
             sseClients.add(response);
             request.on('close', () => sseClients.delete(response));
             return;
@@ -1266,6 +1304,11 @@ async function handleRequest(request, response) {
                 'Cache-Control': 'no-cache'
             });
             return response.end(fileData);
+        }
+
+        // If an /api/* route was requested but not handled above, return clean 404 JSON
+        if (pathname.startsWith('/api/')) {
+            return send(response, 404, { error: `API route not found: ${method} ${pathname}` });
         }
 
         // Static files handler

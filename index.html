@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course | Instant Kenyan University Past Papers, CATs & Special Exams</title>
     <meta name="description" content="Course is Kenya's premier student exam resource portal. Get verified past papers (KES 200), CATs (KES 25), and Special exams (KES 250) delivered instantly via M-Pesa STK Push.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300875a'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z'/%3E%3Cpath fill='%23ffffff' d='M6 6h10v2H6zm0 4h10v2H6zm0 4h7v2H6z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -1289,11 +1290,14 @@
         }
 
         @media (max-width: 600px) {
+            .container { padding: 0 12px; }
             .header-inner { flex-wrap: wrap; height: auto; padding: 12px 0; }
             .nav-search { order: 3; max-width: 100%; width: 100%; margin-top: 8px; }
-            .hero-title { font-size: 24px; line-height: 1.25; }
-            .hero { padding: 24px 0 20px; }
-            .hero-grid { gap: 16px; }
+            .hero-title { font-size: 22px; line-height: 1.25; }
+            .hero { padding: 18px 0 14px; }
+            .hero-grid { gap: 14px; }
+            .app-body { padding: 14px 0 32px; }
+            .content-area { gap: 14px; }
 
             /* Three compact price cards side-by-side horizontally on mobile */
             .price-showcase {
@@ -1337,24 +1341,208 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+
+            /* Explorer bar and filters responsive styling */
+            .explorer-bar {
+                padding: 10px 12px;
+                gap: 10px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .breadcrumbs {
+                font-size: 12.5px;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .view-filters {
+                display: flex;
+                overflow-x: auto;
+                width: 100%;
+                padding-bottom: 2px;
+                gap: 6px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .view-filters::-webkit-scrollbar {
+                display: none;
+            }
+
+            .filter-btn {
+                white-space: nowrap;
+                padding: 6px 12px;
+                font-size: 11.5px;
+                flex-shrink: 0;
+            }
+
+            /* Files section and card responsive rules */
+            .files-section {
+                padding: 14px 10px;
+                border-radius: 12px;
+            }
+
+            .files-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .file-card {
+                padding: 14px 12px;
+                border-radius: 10px;
+            }
+
+            .file-header {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .pdf-icon-badge {
+                width: 38px;
+                height: 44px;
+            }
+
+            .file-title {
+                font-size: 13.5px;
+                line-height: 1.35;
+                margin-bottom: 4px;
+            }
+
+            .file-desc {
+                font-size: 12px;
+                margin-bottom: 12px;
+            }
+
+            .file-specs {
+                gap: 8px;
+                padding: 8px 0;
+                margin-bottom: 12px;
+                font-size: 11.5px;
+            }
+
+            .file-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .file-price {
+                display: flex;
+                flex-direction: row;
+                align-items: baseline;
+                justify-content: space-between;
+            }
+
+            .file-price .val {
+                font-size: 18px;
+            }
+
+            .file-actions {
+                width: 100%;
+                display: flex;
+                gap: 6px;
+            }
+
+            .file-actions .btn-preview {
+                flex: 1;
+                padding: 8px 4px;
+                font-size: 11.5px;
+                white-space: nowrap;
+                text-align: center;
+                justify-content: center;
+                min-width: 0;
+            }
+
+            .file-actions .btn-buy-now {
+                flex: 1.6;
+                padding: 8px 8px;
+                font-size: 12px;
+                white-space: nowrap;
+                text-align: center;
+                justify-content: center;
+                min-width: 0;
+            }
+
+            /* Remove course folders card from mobile view */
+            .folders-section,
+            #subFoldersWrapper {
+                display: none !important;
+            }
+
+            /* Modal optimization for mobile */
+            .modal-overlay {
+                padding: 8px;
+            }
+
+            .modal-card {
+                max-height: 94vh;
+                border-radius: 14px;
+                width: 100%;
+            }
+
+            .modal-header {
+                padding: 14px 16px;
+            }
+
+            .modal-body {
+                padding: 16px 14px;
+            }
+
+            .modal-footer {
+                padding: 12px 14px;
+            }
+
+            .mpesa-modal-header {
+                padding: 18px 14px;
+            }
         }
 
         @media (max-width: 380px) {
+            .container {
+                padding: 0 8px;
+            }
+
+            .files-section {
+                padding: 10px 8px;
+            }
+
+            .file-card {
+                padding: 12px 10px;
+            }
+
+            .file-actions {
+                flex-wrap: wrap;
+            }
+
+            .file-actions .btn-preview {
+                flex: 1 1 calc(50% - 4px);
+            }
+
+            .file-actions .btn-buy-now {
+                flex: 1 1 100%;
+            }
+
             .price-showcase {
                 gap: 4px;
             }
+
             .price-box {
                 padding: 8px 2px;
             }
+
             .price-box .p-label {
                 font-size: 8.5px;
             }
+
             .price-box .p-amount {
                 font-size: 14.5px;
             }
+
             .price-box .p-amount span {
                 font-size: 8px;
             }
+
             .price-box .p-note {
                 font-size: 7.5px;
             }
@@ -2640,6 +2828,7 @@
 
         // SSE Real-time Updates
         function setupLiveUpdates() {
+            if (!window.EventSource) return;
             try {
                 const evtSource = new EventSource('/api/stream');
                 evtSource.addEventListener('order-updated', e => {
@@ -2655,8 +2844,11 @@
                 evtSource.addEventListener('material-added', () => {
                     loadMaterials();
                 });
+                evtSource.onerror = () => {
+                    evtSource.close();
+                };
             } catch (err) {
-                console.warn('SSE not supported or failed to connect:', err);
+                // Silently fallback to polling
             }
         }
 
