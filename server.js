@@ -73,7 +73,7 @@ function createDocPdfBuffer(doc) {
     const faculty = (doc?.faculty || 'School of Computing & Informatics').replace(/[\(\)\r\n]/g, ' ');
     const year = doc?.year || new Date().getFullYear();
 
-    const streamText = `BT\n/F1 16 Tf\n50 780 Td\n(Course - ${title}) Tj\n0 -26 Td\n/F1 12 Tf\n(Unit: ${unitCode} - ${unitName}) Tj\n0 -22 Td\n(Type: ${type} | Year: ${year} | ${faculty}) Tj\n0 -22 Td\n(Official Academic Document & Marking Guide) Tj\n0 -35 Td\n/F1 11 Tf\n(INSTRUCTIONS: Answer all questions in Section A and two in Section B.) Tj\nET`;
+    const streamText = `BT\n/F1 16 Tf\n50 780 Td\n(Course Correct - ${title}) Tj\n0 -26 Td\n/F1 12 Tf\n(Unit: ${unitCode} - ${unitName}) Tj\n0 -22 Td\n(Type: ${type} | Year: ${year} | ${faculty}) Tj\n0 -22 Td\n(Official Academic Document & Marking Guide) Tj\n0 -35 Td\n/F1 11 Tf\n(INSTRUCTIONS: Answer all questions in Section A and two in Section B.) Tj\nET`;
     const streamLen = Buffer.byteLength(streamText, 'utf8');
     return Buffer.from(`%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length ${streamLen} >>\nstream\n${streamText}\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000252 00000 n \n0000000300 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n370\n%%EOF`);
 }
@@ -243,7 +243,7 @@ async function triggerPayHeroStkPush({ apiKey, apiSecret, channelId, phone, amou
         channel_id: resolvedChannelId,
         provider: 'm-pesa',
         external_reference: reference,
-        customer_name: customerName || 'Course Student',
+        customer_name: customerName || 'Course Correct Student',
         callback_url: callbackUrl || ''
     };
 
@@ -423,7 +423,7 @@ async function triggerIntaSendStkPush({ publicKey, phone, amount, reference }) {
         amount: Math.round(amount),
         phone_number: formatPhoneNumber(phone),
         api_ref: reference,
-        name: 'Course Student'
+        name: 'Course Correct Student'
     };
 
     const res = await fetch('https://payment.intasend.com/api/v1/checkout/mpesa-stk-push/', {
@@ -484,8 +484,8 @@ async function triggerDarajaStkPush({ shortcode, passkey, consumerKey, consumerS
         PartyB: shortcode,
         PhoneNumber: formatPhoneNumber(phone),
         CallBackURL: callbackUrl,
-        AccountReference: accountRef || 'Course',
-        TransactionDesc: 'Course Papers'
+        AccountReference: accountRef || 'CourseCorrect',
+        TransactionDesc: 'Course Correct'
     };
 
     const res = await fetch(`${host}/mpesa/stkpush/v1/processrequest`, {
@@ -568,7 +568,7 @@ async function handleRequest(request, response) {
                 const receivingPhone = payment.receivingPhone || process.env.RECEIVING_PHONE || config.receivingPhone || '0707865597';
 
                 return send(response, 200, {
-                    appName: config.appName || 'Course',
+                    appName: config.appName || 'Course Correct',
                     receivingPhone,
                     currency: 'KES',
                     prices: config.prices || { 'past-paper': 200, 'cat': 25, 'special': 250 },
@@ -738,7 +738,7 @@ async function handleRequest(request, response) {
                 if (!fsSync.existsSync(dir)) fsSync.mkdirSync(dir, { recursive: true });
 
                 if (!fsSync.existsSync(fullFilePath)) {
-                    const streamText = `BT\n/F1 14 Tf\n50 780 Td\n(Course - ${newDoc.title.replace(/[\(\)]/g, '')}) Tj\n0 -25 Td\n/F1 11 Tf\n(Unit: ${newDoc.unitCode} - ${newDoc.unitName || ''}) Tj\n0 -20 Td\n(Official Student Copy | KES ${price}) Tj\nET`;
+                    const streamText = `BT\n/F1 14 Tf\n50 780 Td\n(Course Correct - ${newDoc.title.replace(/[\(\)]/g, '')}) Tj\n0 -25 Td\n/F1 11 Tf\n(Unit: ${newDoc.unitCode} - ${newDoc.unitName || ''}) Tj\n0 -20 Td\n(Official Student Copy | KES ${price}) Tj\nET`;
                     const streamLen = Buffer.byteLength(streamText, 'utf8');
                     const pdfBuffer = Buffer.from(`%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length ${streamLen} >>\nstream\n${streamText}\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000252 00000 n \n0000000300 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n370\n%%EOF`);
                     await fs.writeFile(fullFilePath, pdfBuffer);
@@ -837,7 +837,7 @@ async function handleRequest(request, response) {
                             amount: totalAmount,
                             reference: orderId,
                             callbackUrl,
-                            customerName: 'Course Student'
+                            customerName: 'Course Correct Student'
                         });
                         console.log('[PayHero Response]:', apiResult.data);
                         if (apiResult.ok && (apiResult.data.success || apiResult.data.status === 'QUEUED' || apiResult.status === 201)) {
@@ -1295,7 +1295,7 @@ async function handleRequest(request, response) {
                 fileData = createDocPdfBuffer(item);
             }
 
-            const downloadFileName = item ? item.fileName : `Course_${docId}.pdf`;
+            const downloadFileName = item ? item.fileName : `CourseCorrect_${docId}.pdf`;
 
             response.writeHead(200, {
                 'Content-Type': 'application/pdf',
@@ -1341,7 +1341,7 @@ const server = http.createServer(handleRequest);
 if (require.main === module) {
     server.listen(port, () => {
         console.log(`========================================================`);
-        console.log(`Course Student Portal : http://localhost:${port}`);
+        console.log(`Course Correct Student Portal : http://localhost:${port}`);
         console.log(`Vendor & Admin Console : http://localhost:${port}/vender.html`);
         console.log(`API Base               : http://localhost:${port}/api/materials`);
         console.log(`M-Pesa Engine          : Third-Party Direct-to-Phone (PayHero, TinyPesa, IntaSend)`);
