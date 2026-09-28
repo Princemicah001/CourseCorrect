@@ -11,8 +11,8 @@
     "provider": "payhero",
     "receivingPhone": "0707865597",
     "payhero": {
-      "apiKey": "QxiyuzgXc5n7zPPkRGrp",
-      "apiSecret": "dAivyvohFmItaW5qsXXcKp81XzmKZ0aVmHDAW44r",
+      "apiKey": "",
+      "apiSecret": "",
       "channelId": "11662",
       "accountId": "11180",
       "callbackUrl": ""
