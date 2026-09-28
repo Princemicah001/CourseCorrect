@@ -23,6 +23,22 @@
       "1. (b) Explain the collision resolution techniques in Open Addressing hashing: Linear Probing vs Double Hashing [6 Marks]",
       "1. (c) Given array [45, 12, 85, 32, 89, 39, 69, 44, 42, 1, 45], trace the partition step in Quicksort [8 Marks]",
       "2. (a) Construct an AVL Tree by inserting keys: 21, 26, 30, 9, 4, 14, 28, 18, 15 and specify all balance factor updates [12 Marks]"
+    ],
+    "keywords": [
+      "bcs",
+      "201",
+      "data",
+      "structures",
+      "2024",
+      "main",
+      "exam",
+      "pdf",
+      "algorithms",
+      "examination",
+      "april",
+      "and",
+      "bcs201",
+      "bcs_201_data_structures_2024_main_exam"
     ]
   },
   {
@@ -47,6 +63,22 @@
     "previewQuestions": [
       "1. (a) Write a C++ or Java method to detect a cycle in a singly linked list using Floyd’s Cycle Detection [8 Marks]",
       "1. (b) Show that any comparison-based sorting algorithm requires at least Omega(n log n) comparisons in the worst case [6 Marks]"
+    ],
+    "keywords": [
+      "bcs",
+      "201",
+      "data",
+      "structures",
+      "2023",
+      "main",
+      "exam",
+      "pdf",
+      "algorithms",
+      "examination",
+      "nov",
+      "and",
+      "bcs201",
+      "bcs_201_data_structures_2023_main_exam"
     ]
   },
   {
@@ -71,6 +103,26 @@
     "previewQuestions": [
       "1. Evaluate the postfix expression using stack simulation: 12 4 / 5 3 * + 2 ^ [10 Marks]",
       "2. Implement enqueue and dequeue for a Circular Queue of size 8 in pseudocode [10 Marks]"
+    ],
+    "keywords": [
+      "bcs",
+      "201",
+      "data",
+      "structures",
+      "cat1",
+      "2024",
+      "pdf",
+      "cat",
+      "continuous",
+      "assessment",
+      "test",
+      "arrays",
+      "stacks",
+      "queues",
+      "and",
+      "algorithms",
+      "bcs201",
+      "bcs_201_data_structures_cat1_2024"
     ]
   },
   {
@@ -95,6 +147,25 @@
     "previewQuestions": [
       "1. Illustrate node deletion in a BST when the node has two children using in-order successor [10 Marks]",
       "2. Compare Breadth First Search (BFS) and Depth First Search (DFS) space complexity [10 Marks]"
+    ],
+    "keywords": [
+      "bcs",
+      "201",
+      "data",
+      "structures",
+      "cat2",
+      "2024",
+      "pdf",
+      "cat",
+      "binary",
+      "search",
+      "trees",
+      "graph",
+      "traversals",
+      "and",
+      "algorithms",
+      "bcs201",
+      "bcs_201_data_structures_cat2_2024"
     ]
   },
   {
@@ -120,6 +191,23 @@
       "1. (a) Discuss the amortized analysis of dynamic arrays using the accounting method [8 Marks]",
       "1. (b) Explain Red-Black tree properties and demonstrate recoloring during insertion [12 Marks]",
       "2. Solve the 0/1 Knapsack Problem using Dynamic Programming with state table [15 Marks]"
+    ],
+    "keywords": [
+      "bcs",
+      "201",
+      "data",
+      "structures",
+      "special",
+      "exam",
+      "2024",
+      "pdf",
+      "supplementary",
+      "examination",
+      "august",
+      "and",
+      "algorithms",
+      "bcs201",
+      "bcs_201_data_structures_special_exam_2024"
     ]
   },
   {
@@ -144,6 +232,19 @@
     "previewQuestions": [
       "1. Given relation R(A, B, C, D, E) with FDs {A->B, BC->D, D->E}, determine candidate keys and highest normal form [10 Marks]",
       "2. Write advanced SQL queries with window functions (RANK, PARTITION BY) for an e-commerce database [10 Marks]"
+    ],
+    "keywords": [
+      "bit",
+      "301",
+      "database",
+      "systems",
+      "2024",
+      "main",
+      "pdf",
+      "management",
+      "examination",
+      "bit301",
+      "bit_301_database_systems_2024_main"
     ]
   },
   {
@@ -168,6 +269,24 @@
     "previewQuestions": [
       "1. Design an ER diagram for a hospital management system modeling patients, doctors, admissions, and lab tests [15 Marks]",
       "2. Convert multi-valued and composite attributes into normalized tables [10 Marks]"
+    ],
+    "keywords": [
+      "bit",
+      "301",
+      "database",
+      "cat1",
+      "2024",
+      "pdf",
+      "cat",
+      "er",
+      "modeling",
+      "relational",
+      "schema",
+      "design",
+      "management",
+      "systems",
+      "bit301",
+      "bit_301_database_cat1_2024"
     ]
   },
   {
@@ -192,6 +311,21 @@
     "previewQuestions": [
       "1. Explain how Two-Phase Locking (2PL) guarantees conflict serializability and how strict 2PL prevents cascading rollbacks [12 Marks]",
       "2. Construct a B+ Tree of order 4 inserting keys: 10, 20, 30, 40, 50, 60, 70 [12 Marks]"
+    ],
+    "keywords": [
+      "bit",
+      "301",
+      "database",
+      "special",
+      "exam",
+      "2024",
+      "pdf",
+      "supplementary",
+      "examination",
+      "systems",
+      "management",
+      "bit301",
+      "bit_301_database_special_exam_2024"
     ]
   },
   {
@@ -216,6 +350,18 @@
     "previewQuestions": [
       "1. Prepare the Statement of Profit or Loss and Financial Position for Zawadi Enterprises for year ended 31st Dec 2023 [20 Marks]",
       "2. Explain the accounting treatment of depreciation using Reducing Balance vs Straight Line method [10 Marks]"
+    ],
+    "keywords": [
+      "bba",
+      "101",
+      "financial",
+      "accounting",
+      "2024",
+      "main",
+      "pdf",
+      "examination",
+      "bba101",
+      "bba_101_financial_accounting_2024_main"
     ]
   },
   {
@@ -239,6 +385,23 @@
     "filePath": "documents/business/BBA_101_Financial_Accounting_CAT1_2024.pdf",
     "previewQuestions": [
       "1. Reconcile the cash book balance of Sh. 145,800 with the bank statement showing Sh. 182,300 with step adjustments [20 Marks]"
+    ],
+    "keywords": [
+      "bba",
+      "101",
+      "financial",
+      "accounting",
+      "cat1",
+      "2024",
+      "pdf",
+      "cat",
+      "double",
+      "entry",
+      "system",
+      "bank",
+      "reconciliation",
+      "bba101",
+      "bba_101_financial_accounting_cat1_2024"
     ]
   },
   {
@@ -263,6 +426,19 @@
     "previewQuestions": [
       "1. Journalize entries to correct six major errors and prepare the Suspense Account [15 Marks]",
       "2. Reconstruct sales and purchases ledger control accounts from single entry records [15 Marks]"
+    ],
+    "keywords": [
+      "bba",
+      "101",
+      "financial",
+      "accounting",
+      "special",
+      "2024",
+      "pdf",
+      "supplementary",
+      "examination",
+      "bba101",
+      "bba_101_financial_accounting_special_2024"
     ]
   },
   {
@@ -287,6 +463,20 @@
     "previewQuestions": [
       "1. With reference to decided cases, discuss the doctrine of privity of contract and its recognized exceptions under Kenyan law [15 Marks]",
       "2. Advise Otieno in a dispute regarding breach of condition vs warranty in Sale of Goods Act [15 Marks]"
+    ],
+    "keywords": [
+      "bba",
+      "304",
+      "business",
+      "law",
+      "2024",
+      "main",
+      "pdf",
+      "examination",
+      "commercial",
+      "practice",
+      "bba304",
+      "bba_304_business_law_2024_main"
     ]
   },
   {
@@ -310,6 +500,24 @@
     "filePath": "documents/business/BBA_304_Business_Law_CAT1_2024.pdf",
     "previewQuestions": [
       "1. Explain the neighbor principle enunciated in Donoghue v Stevenson [1892] and its application in modern negligence claims [10 Marks]"
+    ],
+    "keywords": [
+      "bba",
+      "304",
+      "business",
+      "law",
+      "cat1",
+      "2024",
+      "pdf",
+      "cat",
+      "sources",
+      "of",
+      "kenyan",
+      "torts",
+      "commercial",
+      "practice",
+      "bba304",
+      "bba_304_business_law_cat1_2024"
     ]
   },
   {
@@ -333,6 +541,20 @@
     "filePath": "documents/business/BBA_304_Business_Law_Special_2024.pdf",
     "previewQuestions": [
       "1. Examine the duties of an agent to the principal and circumstances terminating an agency agreement [15 Marks]"
+    ],
+    "keywords": [
+      "bba",
+      "304",
+      "business",
+      "law",
+      "special",
+      "2024",
+      "pdf",
+      "examination",
+      "commercial",
+      "practice",
+      "bba304",
+      "bba_304_business_law_special_2024"
     ]
   },
   {
@@ -357,6 +579,21 @@
     "previewQuestions": [
       "1. (a) Evaluate limit as x approaches 0 of (sin 3x - 3x) / x^3 using L'Hopital's rule [6 Marks]",
       "1. (b) Find the directional derivative of f(x, y, z) = 2x^2 + y^2 - z at point P(1, 2, 3) along vector 2i + j - 2k [8 Marks]"
+    ],
+    "keywords": [
+      "eng",
+      "101",
+      "engineering",
+      "maths",
+      "2024",
+      "main",
+      "pdf",
+      "mathematics",
+      "examination",
+      "calculus",
+      "vectors",
+      "eng101",
+      "eng_101_engineering_maths_2024_main"
     ]
   },
   {
@@ -380,6 +617,25 @@
     "filePath": "documents/engineering/ENG_101_Engineering_Maths_CAT1_2024.pdf",
     "previewQuestions": [
       "1. Find dy/dx and d2y/dx2 for curve x^3 + y^3 - 3axy = 0 at point (3a/2, 3a/2) [10 Marks]"
+    ],
+    "keywords": [
+      "eng",
+      "101",
+      "engineering",
+      "maths",
+      "cat1",
+      "2024",
+      "pdf",
+      "cat",
+      "limits",
+      "continuity",
+      "implicit",
+      "differentiation",
+      "mathematics",
+      "calculus",
+      "vectors",
+      "eng101",
+      "eng_101_engineering_maths_cat1_2024"
     ]
   },
   {
@@ -403,6 +659,22 @@
     "filePath": "documents/engineering/ENG_101_Engineering_Maths_Special_2024.pdf",
     "previewQuestions": [
       "1. Derive the reduction formula for integral of sin^n(x) dx and evaluate integral from 0 to pi/2 of sin^6(x) dx [12 Marks]"
+    ],
+    "keywords": [
+      "eng",
+      "101",
+      "engineering",
+      "maths",
+      "special",
+      "2024",
+      "pdf",
+      "supplementary",
+      "exam",
+      "mathematics",
+      "calculus",
+      "vectors",
+      "eng101",
+      "eng_101_engineering_maths_special_2024"
     ]
   },
   {
@@ -427,6 +699,19 @@
     "previewQuestions": [
       "1. Describe the cardiac cycle phases with reference to Wiggers diagram and pressure-volume loops [15 Marks]",
       "2. Explain the Renin-Angiotensin-Aldosterone System (RAAS) in blood pressure homeostasis [15 Marks]"
+    ],
+    "keywords": [
+      "med",
+      "201",
+      "human",
+      "anatomy",
+      "2024",
+      "main",
+      "pdf",
+      "physiology",
+      "examination",
+      "med201",
+      "med_201_human_anatomy_2024_main"
     ]
   },
   {
@@ -450,6 +735,22 @@
     "filePath": "documents/health/MED_201_Human_Anatomy_CAT1_2024.pdf",
     "previewQuestions": [
       "1. Outline the role of Calcium ions and ATP in the actin-myosin cross-bridge cycle [10 Marks]"
+    ],
+    "keywords": [
+      "med",
+      "201",
+      "human",
+      "anatomy",
+      "cat1",
+      "2024",
+      "pdf",
+      "cat",
+      "cellular",
+      "physiology",
+      "musculoskeletal",
+      "system",
+      "med201",
+      "med_201_human_anatomy_cat1_2024"
     ]
   },
   {
@@ -473,6 +774,20 @@
     "filePath": "documents/health/MED_201_Human_Anatomy_Special_2024.pdf",
     "previewQuestions": [
       "1. Describe the physiological buffering systems defending against metabolic acidosis [15 Marks]"
+    ],
+    "keywords": [
+      "med",
+      "201",
+      "human",
+      "anatomy",
+      "special",
+      "2024",
+      "pdf",
+      "supplementary",
+      "exam",
+      "physiology",
+      "med201",
+      "med_201_human_anatomy_special_2024"
     ]
   },
   {
@@ -497,6 +812,19 @@
     "previewQuestions": [
       "1. Critically analyze the Basic Structure Doctrine in light of the landmark Supreme Court decision in BBI [2022] [20 Marks]",
       "2. Discuss the grounds for Judicial Review under the Fair Administrative Action Act 2015 [15 Marks]"
+    ],
+    "keywords": [
+      "law",
+      "101",
+      "constitutional",
+      "2024",
+      "main",
+      "pdf",
+      "examination",
+      "of",
+      "kenya",
+      "law101",
+      "law_101_constitutional_law_2024_main"
     ]
   },
   {
@@ -520,6 +848,23 @@
     "filePath": "documents/law/LAW_101_Constitutional_Law_CAT1_2024.pdf",
     "previewQuestions": [
       "1. Examine the test for proportionality when limiting fundamental freedoms under Article 24 of the Constitution [15 Marks]"
+    ],
+    "keywords": [
+      "law",
+      "101",
+      "constitutional",
+      "cat1",
+      "2024",
+      "pdf",
+      "cat",
+      "the",
+      "bill",
+      "of",
+      "rights",
+      "constitutionalism",
+      "kenya",
+      "law101",
+      "law_101_constitutional_law_cat1_2024"
     ]
   },
   {
@@ -543,6 +888,20 @@
     "filePath": "documents/law/LAW_101_Constitutional_Law_Special_2024.pdf",
     "previewQuestions": [
       "1. Evaluate the constitutional thresholds for impeachment under Chapter Eleven and Article 181 [20 Marks]"
+    ],
+    "keywords": [
+      "law",
+      "101",
+      "constitutional",
+      "special",
+      "2024",
+      "pdf",
+      "supplementary",
+      "exam",
+      "of",
+      "kenya",
+      "law101",
+      "law_101_constitutional_law_special_2024"
     ]
   }
 ]

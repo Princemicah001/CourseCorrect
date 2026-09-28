@@ -676,11 +676,13 @@ async function handleRequest(request, response) {
                 }
                 if (q) {
                     filtered = filtered.filter(m =>
-                        m.title.toLowerCase().includes(q) ||
-                        m.unitCode.toLowerCase().includes(q) ||
-                        m.unitName.toLowerCase().includes(q) ||
-                        m.description.toLowerCase().includes(q) ||
-                        m.faculty.toLowerCase().includes(q)
+                        (m.title && m.title.toLowerCase().includes(q)) ||
+                        (m.unitCode && m.unitCode.toLowerCase().includes(q)) ||
+                        (m.unitName && m.unitName.toLowerCase().includes(q)) ||
+                        (m.fileName && m.fileName.toLowerCase().includes(q)) ||
+                        (m.keywords && m.keywords.some(k => k.toLowerCase().includes(q))) ||
+                        (m.description && m.description.toLowerCase().includes(q)) ||
+                        (m.faculty && m.faculty.toLowerCase().includes(q))
                     );
                 }
 
@@ -730,19 +732,40 @@ async function handleRequest(request, response) {
                 const category = newDoc.type.toLowerCase().includes('cat') ? 'cat' : (newDoc.type.toLowerCase().includes('special') ? 'special' : 'past-paper');
 
                 const facultySlug = (newDoc.facultyId || 'general').toLowerCase().replace(/[^a-z0-9]/g, '-');
-                const cleanFileName = (newDoc.fileName || `${newDoc.unitCode}_${newDoc.title}.pdf`).replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+                let adoptedFileName = (newDoc.fileName || '').trim();
+                if (!adoptedFileName.toLowerCase().endsWith('.pdf')) {
+                    adoptedFileName = adoptedFileName ? `${adoptedFileName}.pdf` : `${newDoc.unitCode}_${newDoc.title}.pdf`;
+                }
+                const cleanFileName = adoptedFileName.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
                 const relFilePath = path.join('documents', facultySlug, cleanFileName);
                 const fullFilePath = path.join(root, relFilePath);
 
                 const dir = path.dirname(fullFilePath);
                 if (!fsSync.existsSync(dir)) fsSync.mkdirSync(dir, { recursive: true });
 
-                if (!fsSync.existsSync(fullFilePath)) {
+                let calculatedFileSize = '320 KB';
+                if (newDoc.fileBase64) {
+                    const base64Data = newDoc.fileBase64.replace(/^data:application\/pdf;base64,/, '').replace(/^data:.*?;base64,/, '');
+                    const pdfBuffer = Buffer.from(base64Data, 'base64');
+                    await fs.writeFile(fullFilePath, pdfBuffer);
+                    calculatedFileSize = `${Math.max(1, Math.round(pdfBuffer.length / 1024))} KB`;
+                } else if (!fsSync.existsSync(fullFilePath)) {
                     const streamText = `BT\n/F1 14 Tf\n50 780 Td\n(Course Correct - ${newDoc.title.replace(/[\(\)]/g, '')}) Tj\n0 -25 Td\n/F1 11 Tf\n(Unit: ${newDoc.unitCode} - ${newDoc.unitName || ''}) Tj\n0 -20 Td\n(Official Student Copy | KES ${price}) Tj\nET`;
                     const streamLen = Buffer.byteLength(streamText, 'utf8');
                     const pdfBuffer = Buffer.from(`%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length ${streamLen} >>\nstream\n${streamText}\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000252 00000 n \n0000000300 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n370\n%%EOF`);
                     await fs.writeFile(fullFilePath, pdfBuffer);
                 }
+
+                // Index keywords for search
+                const rawKeywords = [
+                    ...cleanFileName.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/),
+                    ...newDoc.title.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/),
+                    ...newDoc.unitCode.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/),
+                    ...(newDoc.unitName || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/),
+                    newDoc.unitCode.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                    cleanFileName.toLowerCase().replace(/\.pdf$/, '')
+                ];
+                const keywords = Array.from(new Set(rawKeywords.filter(k => k && k.length > 1)));
 
                 const docRecord = {
                     id,
@@ -758,11 +781,12 @@ async function handleRequest(request, response) {
                     semester: newDoc.semester || 'Semester 1',
                     institution: newDoc.institution || 'University Examination Board',
                     pages: Number(newDoc.pages) || 5,
-                    fileSize: newDoc.fileSize || '320 KB',
+                    fileSize: newDoc.fileSize || calculatedFileSize,
                     hasSolutions: Boolean(newDoc.hasSolutions ?? true),
                     description: newDoc.description || 'Verified past academic resource with marking scheme.',
                     fileName: cleanFileName,
                     filePath: relFilePath,
+                    keywords,
                     previewQuestions: newDoc.previewQuestions || [
                         '1. Compulsory questions with marking guide included.'
                     ]

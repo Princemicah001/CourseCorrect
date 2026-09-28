@@ -243,6 +243,21 @@
             justify-content: space-between;
         }
 
+        .drop-box {
+            border: 2px dashed var(--line);
+            border-radius: 10px;
+            padding: 20px 16px;
+            text-align: center;
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .drop-box:hover {
+            border-color: var(--mpesa);
+            background: #f4faf6;
+        }
+
         /* Tabs */
         .tabs {
             display: flex;
@@ -370,6 +385,21 @@
                 </div>
 
                 <form id="addMaterialForm" onsubmit="handleCreateMaterial(event)">
+                    <div class="form-group">
+                        <label for="docFileInput">Upload Exam Document (PDF) <span style="color:var(--mpesa); font-weight:700;">*</span></label>
+                        <div class="drop-box" id="dropBox" onclick="document.getElementById('docFileInput').click()">
+                            <input type="file" id="docFileInput" accept="application/pdf,.pdf" onchange="handleFileSelected(event)" style="display:none;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:6px; color:var(--mpesa);">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div style="font-weight:700; font-size:13.5px; color:var(--dark);">Choose or drag &amp; drop PDF exam document</div>
+                            <div style="font-size:12px; color:var(--muted); margin-top:3px;">The uploaded file name is automatically adopted for the exam and indexed for search</div>
+                            <div id="fileChosenName" style="display:none; color:var(--mpesa); font-weight:700; margin-top:8px; font-size:13px; word-break:break-all; padding:6px 12px; background:#e3fcef; border-radius:6px;"></div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="docFaculty">School / Faculty</label>
                         <select id="docFaculty" class="form-control" required onchange="handleFacultyChange()">
@@ -875,6 +905,73 @@
             }
         }
 
+        let selectedFile = null;
+
+        function handleFileSelected(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            selectedFile = file;
+
+            const chosenEl = document.getElementById('fileChosenName');
+            chosenEl.innerText = `Uploaded File: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+            chosenEl.style.display = 'block';
+
+            // Adopt file name into title and unit code
+            const rawName = file.name.replace(/\.[^/.]+$/, '');
+            const cleanTitle = rawName.replace(/[_\-]+/g, ' ').trim();
+
+            const titleInput = document.getElementById('docTitle');
+            if (!titleInput.value.trim() || titleInput.value.includes('e.g.')) {
+                titleInput.value = cleanTitle;
+            }
+
+            const unitMatch = rawName.match(/([a-zA-Z]{2,5})\s*[-_]?\s*(\d{3,4})/);
+            if (unitMatch) {
+                const unitCode = `${unitMatch[1].toUpperCase()} ${unitMatch[2]}`;
+                const unitInput = document.getElementById('docUnitCode');
+                if (!unitInput.value.trim() || unitInput.value.includes('e.g.')) {
+                    unitInput.value = unitCode;
+                }
+            }
+
+            const yearMatch = rawName.match(/\b(20[12]\d)\b/);
+            if (yearMatch) {
+                document.getElementById('docYear').value = yearMatch[1];
+            }
+        }
+
+        const dropBoxEl = document.getElementById('dropBox');
+        if (dropBoxEl) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropBoxEl.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropBoxEl.style.borderColor = 'var(--mpesa)';
+                    dropBoxEl.style.background = '#e3fcef';
+                }, false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropBoxEl.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropBoxEl.style.borderColor = '';
+                    dropBoxEl.style.background = '';
+                }, false);
+            });
+            dropBoxEl.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    const file = files[0];
+                    if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+                        handleFileSelected({ target: { files: [file] } });
+                    } else {
+                        alert('Please upload a valid PDF document.');
+                    }
+                }
+            });
+        }
+
         async function handleCreateMaterial(e) {
             e.preventDefault();
             const facultySelect = document.getElementById('docFaculty');
@@ -883,13 +980,31 @@
             const type = document.getElementById('docType').value;
             const unitCode = document.getElementById('docUnitCode').value.trim();
             const unitName = document.getElementById('docUnitName').value.trim();
-            const title = document.getElementById('docTitle').value.trim();
+            let title = document.getElementById('docTitle').value.trim();
             const year = Number(document.getElementById('docYear').value) || 2024;
             const pages = Number(document.getElementById('docPages').value) || 5;
             const hasSolutions = document.getElementById('docHasSolutions').checked;
             const description = document.getElementById('docDescription').value.trim();
             const sampleQRaw = document.getElementById('docSampleQ').value.trim();
             const previewQuestions = sampleQRaw ? sampleQRaw.split('\n').filter(Boolean) : [];
+
+            if (!title && selectedFile) {
+                title = selectedFile.name.replace(/\.[^/.]+$/, '').replace(/[_\-]+/g, ' ').trim();
+            }
+
+            let fileBase64 = null;
+            if (selectedFile) {
+                try {
+                    fileBase64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(selectedFile);
+                    });
+                } catch (readErr) {
+                    console.error('Failed to read file:', readErr);
+                }
+            }
 
             const payload = {
                 faculty: facultyName,
@@ -902,6 +1017,8 @@
                 pages,
                 hasSolutions,
                 description,
+                fileName: selectedFile ? selectedFile.name : undefined,
+                fileBase64,
                 previewQuestions
             };
 
@@ -913,8 +1030,10 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    alert(`Published "${title}"! PDF document generated on disk.`);
+                    alert(`Published "${title}"! File name "${data.material.fileName}" adopted and indexed for instant search.`);
                     document.getElementById('addMaterialForm').reset();
+                    selectedFile = null;
+                    document.getElementById('fileChosenName').style.display = 'none';
                     updatePriceNotice();
                     loadCatalog();
                 } else {

@@ -153,13 +153,14 @@
         .nav-search input {
             width: 100%;
             height: 44px;
-            padding: 0 16px 0 42px;
+            padding: 0 38px 0 42px;
             border-radius: 22px;
             border: 1.5px solid var(--border);
             background: #fafbfc;
             font-size: 14px;
             color: var(--text-main);
             transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
         .nav-search input:focus {
@@ -176,6 +177,194 @@
             transform: translateY(-50%);
             color: var(--text-muted);
             pointer-events: none;
+        }
+
+        .nav-search .search-clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #e4e7ec;
+            color: #475467;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            z-index: 2;
+        }
+
+        .nav-search .search-clear-btn:hover {
+            background: #d0d5dd;
+            color: #1d2939;
+        }
+
+        /* Autocomplete Suggestions Dropdown */
+        .search-suggestions-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+            max-height: 380px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-header {
+            padding: 8px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background: #fafbfc;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .suggestion-item {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f4f5f7;
+            transition: background 0.12s ease;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.active {
+            background: #f0fdf4;
+        }
+
+        .suggestion-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .suggestion-subtitle {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .suggestion-badge {
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .suggestion-badge.past-paper {
+            background: #e3fcef;
+            color: #00875a;
+        }
+
+        .suggestion-badge.cat {
+            background: #deebff;
+            color: #0747a6;
+        }
+
+        .suggestion-badge.special {
+            background: #eae6ff;
+            color: #403294;
+        }
+
+        /* Filter out all UI elements when searching */
+        .searching-active .hero,
+        .searching-active .sidebar,
+        .searching-active .explorer-bar,
+        .searching-active #subFoldersWrapper {
+            display: none !important;
+        }
+
+        .searching-active .explorer-layout {
+            grid-template-columns: minmax(0, 1fr) !important;
+        }
+
+        /* Search Results Banner */
+        .search-results-banner {
+            display: none;
+            background: #f0fdf4;
+            border: 1.5px solid rgba(0, 168, 89, 0.25);
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .searching-active .search-results-banner {
+            display: flex;
+        }
+
+        .search-banner-text {
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .search-banner-query {
+            font-weight: 700;
+            color: var(--mpesa);
+        }
+
+        .search-banner-count {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .search-banner-clear {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 14px;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .search-banner-clear:hover {
+            background: #f4f5f7;
+            border-color: #c1c7d0;
+            color: var(--dark);
         }
 
         .nav-actions {
@@ -1625,7 +1814,9 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="searchInput" placeholder="Search by course code (e.g. BCS 201), title, or faculty...">
+                <input type="text" id="searchInput" placeholder="Search by course code (e.g. BCS 201), title, or keywords..." autocomplete="off">
+                <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" title="Clear search" aria-label="Clear search">&times;</button>
+                <div class="search-suggestions-dropdown" id="searchSuggestionsDropdown"></div>
             </div>
 
             <div class="nav-actions">
@@ -1699,6 +1890,21 @@
 
             <!-- Main Content: Folders & PDF Files -->
             <section class="content-area">
+
+                <!-- Search Results Banner (Shown only when searching) -->
+                <div class="search-results-banner" id="searchResultsBanner">
+                    <div class="search-banner-text">
+                        Showing search results for <span class="search-banner-query" id="searchBannerQuery">""</span>
+                        <span class="search-banner-count" id="searchBannerCount">(0 documents found)</span>
+                    </div>
+                    <button type="button" class="search-banner-clear" onclick="clearSearch()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        Clear Search &amp; Show All
+                    </button>
+                </div>
 
                 <!-- Explorer Toolbar & Breadcrumbs -->
                 <div class="explorer-bar">
@@ -2195,33 +2401,182 @@
             }
         }
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Multi-tier search engine scoring exact phrase, permutations, acronyms, compact codes, and keywords
+        function scoreAndSearchMaterials(materials, rawQuery) {
+            if (!rawQuery) return materials;
+
+            const q = rawQuery.toLowerCase().trim();
+            const compactQ = q.replace(/[^a-z0-9]/g, '');
+            const queryWords = q.split(/\s+/).filter(w => w.length > 0);
+
+            const scored = [];
+
+            materials.forEach(m => {
+                let score = 0;
+
+                const title = (m.title || '').toLowerCase();
+                const unitCode = (m.unitCode || '').toLowerCase();
+                const unitName = (m.unitName || '').toLowerCase();
+                const fileName = (m.fileName || '').toLowerCase();
+                const faculty = (m.faculty || '').toLowerCase();
+                const description = (m.description || '').toLowerCase();
+                const type = (m.type || '').toLowerCase();
+                const year = String(m.year || '');
+                const keywords = Array.isArray(m.keywords) ? m.keywords.map(k => k.toLowerCase()) : [];
+
+                const compactUnitCode = unitCode.replace(/[^a-z0-9]/g, '');
+                const compactTitle = title.replace(/[^a-z0-9]/g, '');
+                const compactFileName = fileName.replace(/[^a-z0-9]/g, '');
+                const compactUnitName = unitName.replace(/[^a-z0-9]/g, '');
+
+                const identityText = `${unitCode} ${unitName} ${title} ${fileName}`.toLowerCase();
+                const compactIdentity = identityText.replace(/[^a-z0-9]/g, '');
+
+                const combinedAll = [title, unitCode, unitName, fileName, faculty, description, type, year, ...keywords].join(' ');
+
+                // 1. Exact phrase matches in identity & content
+                if (title === q) score += 500;
+                else if (title.includes(q)) score += 250;
+
+                if (unitCode === q) score += 450;
+                else if (unitCode.includes(q)) score += 220;
+
+                if (fileName === q) score += 400;
+                else if (fileName.includes(q)) score += 200;
+
+                if (unitName === q) score += 350;
+                else if (unitName.includes(q)) score += 180;
+
+                if (faculty.includes(q)) score += 80;
+                if (description.includes(q)) score += 60;
+                if (type.includes(q)) score += 50;
+
+                // 2. Compact code / alphanumeric match (e.g. "bcs201" -> "BCS 201")
+                if (compactQ.length >= 2) {
+                    if (compactUnitCode === compactQ) score += 400;
+                    else if (compactUnitCode.includes(compactQ) || compactQ.includes(compactUnitCode)) score += 220;
+
+                    if (compactFileName.includes(compactQ)) score += 180;
+                    if (compactTitle.includes(compactQ)) score += 160;
+                    if (compactUnitName.includes(compactQ)) score += 150;
+                    if (compactQ.length >= 4 && compactIdentity.includes(compactQ)) score += 100;
+                }
+
+                // 3. Word arrangement / permutation matching
+                if (queryWords.length > 0) {
+                    let matchedCount = 0;
+                    queryWords.forEach(word => {
+                        const compactW = word.replace(/[^a-z0-9]/g, '');
+                        const inIdentity = identityText.includes(word) || (compactW && compactIdentity.includes(compactW));
+                        const inBody = combinedAll.includes(word) || keywords.some(k => k.includes(word));
+                        if (inIdentity) {
+                            matchedCount++;
+                            score += 50;
+                        } else if (inBody) {
+                            matchedCount++;
+                            score += 25;
+                        }
+                    });
+
+                    if (matchedCount === queryWords.length && queryWords.length > 1) {
+                        score += 250 + (queryWords.length * 30);
+                    }
+                }
+
+                // 4. Keyword matches
+                if (keywords.length > 0) {
+                    keywords.forEach(kw => {
+                        if (kw === q) score += 150;
+                        else if (kw.includes(q) && q.length >= 3) score += 40;
+                    });
+                }
+
+                // 5. Acronym / Initials matching (e.g. "dsa" -> "Data Structures & Algorithms")
+                if (compactQ.length >= 2 && compactQ.length <= 6) {
+                    const unitWords = unitName.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+                    const unitAcronym = unitWords.map(w => w[0].toLowerCase()).join('');
+                    if (unitAcronym === compactQ) score += 350;
+                    else if (unitAcronym.includes(compactQ)) score += 180;
+
+                    const titleWords = title.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+                    const titleAcronym = titleWords.map(w => w[0].toLowerCase()).join('');
+                    if (titleAcronym === compactQ) score += 300;
+                    else if (titleAcronym.includes(compactQ)) score += 150;
+                }
+
+                // 6. Subsequence matching on identity (unitCode, unitName, title, fileName)
+                if (score === 0 && compactQ.length >= 3) {
+                    let qIdx = 0;
+                    for (let i = 0; i < compactIdentity.length && qIdx < compactQ.length; i++) {
+                        if (compactIdentity[i] === compactQ[qIdx]) qIdx++;
+                    }
+                    if (qIdx === compactQ.length) score += 45;
+                }
+
+                if (score > 0) {
+                    scored.push({ doc: m, score });
+                }
+            });
+
+            // Return all matching documents sorted by score descending
+            scored.sort((a, b) => b.score - a.score);
+            return scored.map(item => item.doc);
+        }
+
         // Render PDF Document Files Cards
         function renderFilesGrid() {
             const container = document.getElementById('filesGridContainer');
             const countLabel = document.getElementById('displayedFilesCount');
             container.innerHTML = '';
 
-            let filtered = allMaterials;
+            const searchInput = document.getElementById('searchInput');
+            const query = (searchInput ? searchInput.value : '').trim();
 
-            if (currentFaculty !== 'all') {
-                filtered = filtered.filter(m => m.facultyId === currentFaculty);
-            }
-            if (currentUnit !== 'all') {
-                filtered = filtered.filter(m => m.unitCode === currentUnit);
-            }
-            if (currentCategory !== 'all') {
-                filtered = filtered.filter(m => m.category === currentCategory);
-            }
+            let filtered = [];
 
-            const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
             if (query) {
-                filtered = filtered.filter(m =>
-                    m.title.toLowerCase().includes(query) ||
-                    m.unitCode.toLowerCase().includes(query) ||
-                    m.unitName.toLowerCase().includes(query) ||
-                    m.description.toLowerCase().includes(query) ||
-                    m.type.toLowerCase().includes(query)
-                );
+                // When searching, filter out all UI elements and show ALL results across the entire library
+                document.body.classList.add('searching-active');
+                const clearBtn = document.getElementById('searchClearBtn');
+                if (clearBtn) clearBtn.style.display = 'flex';
+
+                const bannerQuery = document.getElementById('searchBannerQuery');
+                const bannerCount = document.getElementById('searchBannerCount');
+
+                // Search across ALL materials
+                filtered = scoreAndSearchMaterials(allMaterials, query);
+
+                if (bannerQuery) bannerQuery.innerText = `"${query}"`;
+                if (bannerCount) bannerCount.innerText = `(${filtered.length} documents found)`;
+                const heading = document.getElementById('filesSectionHeading');
+                if (heading) heading.innerText = 'Search Results';
+            } else {
+                document.body.classList.remove('searching-active');
+                const clearBtn = document.getElementById('searchClearBtn');
+                if (clearBtn) clearBtn.style.display = 'none';
+                const heading = document.getElementById('filesSectionHeading');
+                if (heading) heading.innerText = 'Available PDF Documents';
+
+                filtered = allMaterials;
+                if (currentFaculty !== 'all') {
+                    filtered = filtered.filter(m => m.facultyId === currentFaculty);
+                }
+                if (currentUnit !== 'all') {
+                    filtered = filtered.filter(m => m.unitCode === currentUnit);
+                }
+                if (currentCategory !== 'all') {
+                    filtered = filtered.filter(m => m.category === currentCategory);
+                }
             }
 
             countLabel.innerText = `${filtered.length} documents`;
@@ -2235,8 +2590,8 @@
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
                         <h4 style="font-size:16px; color:var(--dark); margin-bottom:6px;">No exam materials found</h4>
-                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Try adjusting your search keywords or filter category.</p>
-                        <button class="btn btn-ghost" onclick="resetFilter()">Reset All Filters</button>
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Try adjusting your search keywords or course code.</p>
+                        <button class="btn btn-ghost" onclick="clearSearch()">Clear Search &amp; Show All</button>
                     </div>
                 `;
                 return;
@@ -2246,7 +2601,6 @@
                 const card = document.createElement('div');
                 card.className = `file-card ${doc.category}`;
 
-                const typeBadgeClass = doc.category === 'past-paper' ? 'tag-pp' : (doc.category === 'cat' ? 'tag-cat' : 'tag-special');
                 const priceFormatted = `KES ${doc.price}`;
 
                 card.innerHTML = `
@@ -2259,7 +2613,7 @@
                             <span>PDF</span>
                         </div>
                         <div class="file-info">
-                            <h4 class="file-title">${doc.title}</h4>
+                            <h4 class="file-title">${escapeHtml(doc.title)}</h4>
                         </div>
                     </div>
 
@@ -2280,6 +2634,86 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        // Autocomplete Suggestions & Clear Search
+        let activeSuggestionIndex = -1;
+
+        function updateSearchSuggestions(query) {
+            const dropdown = document.getElementById('searchSuggestionsDropdown');
+            if (!dropdown) return;
+
+            const q = (query || '').trim();
+            if (!q) {
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
+                activeSuggestionIndex = -1;
+                return;
+            }
+
+            const results = scoreAndSearchMaterials(allMaterials, q);
+            if (results.length === 0) {
+                dropdown.innerHTML = `
+                    <div style="padding:14px; text-align:center; color:var(--text-muted); font-size:13px;">
+                        No instant suggestions for "${escapeHtml(q)}"
+                    </div>
+                `;
+                dropdown.style.display = 'block';
+                activeSuggestionIndex = -1;
+                return;
+            }
+
+            const topResults = results.slice(0, 6);
+            let html = `
+                <div class="suggestion-header">
+                    <span>Suggested Exam Documents (${results.length})</span>
+                    <span>Press Enter to Search</span>
+                </div>
+            `;
+
+            topResults.forEach((doc, idx) => {
+                const badgeClass = doc.category === 'past-paper' ? 'past-paper' : (doc.category === 'cat' ? 'cat' : 'special');
+                html += `
+                    <div class="suggestion-item" data-index="${idx}" onclick="selectSuggestion('${doc.id}')">
+                        <div style="min-width:0; flex:1;">
+                            <div class="suggestion-title">${escapeHtml(doc.title)}</div>
+                            <div class="suggestion-subtitle">${escapeHtml(doc.unitCode)} &bull; ${escapeHtml(doc.unitName || doc.faculty)}</div>
+                        </div>
+                        <span class="suggestion-badge ${badgeClass}">KES ${doc.price}</span>
+                    </div>
+                `;
+            });
+
+            dropdown.innerHTML = html;
+            dropdown.style.display = 'block';
+            activeSuggestionIndex = -1;
+        }
+
+        function selectSuggestion(docId) {
+            const doc = allMaterials.find(m => m.id === docId);
+            if (!doc) return;
+            const input = document.getElementById('searchInput');
+            if (input) {
+                input.value = doc.title;
+            }
+            const dropdown = document.getElementById('searchSuggestionsDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+            renderFilesGrid();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            if (input) input.value = '';
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (clearBtn) clearBtn.style.display = 'none';
+            const dropdown = document.getElementById('searchSuggestionsDropdown');
+            if (dropdown) {
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
+            }
+            document.body.classList.remove('searching-active');
+            renderFilesGrid();
+            if (input) input.focus();
         }
 
         // Folder & Filter Navigation Handlers
@@ -2314,14 +2748,15 @@
             currentFaculty = 'all';
             currentUnit = 'all';
             currentCategory = 'all';
-            document.getElementById('searchInput').value = '';
+            const input = document.getElementById('searchInput');
+            if (input) input.value = '';
             document.querySelectorAll('.view-filters .filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-cat') === 'all');
             });
+            clearSearch();
             updateBreadcrumbs();
             renderSidebarFolders();
             renderSubFoldersGrid();
-            renderFilesGrid();
         }
 
         function updateBreadcrumbs() {
@@ -2343,8 +2778,59 @@
 
         function setupSearch() {
             const input = document.getElementById('searchInput');
+            const dropdown = document.getElementById('searchSuggestionsDropdown');
+            if (!input) return;
+
             input.addEventListener('input', () => {
                 renderFilesGrid();
+                updateSearchSuggestions(input.value);
+            });
+
+            input.addEventListener('focus', () => {
+                if (input.value.trim().length > 0) {
+                    updateSearchSuggestions(input.value);
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (!dropdown || dropdown.style.display === 'none') return;
+                const items = dropdown.querySelectorAll('.suggestion-item');
+                if (!items.length) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
+                    items.forEach((it, idx) => it.classList.toggle('active', idx === activeSuggestionIndex));
+                    if (items[activeSuggestionIndex]) {
+                        items[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
+                    items.forEach((it, idx) => it.classList.toggle('active', idx === activeSuggestionIndex));
+                    if (items[activeSuggestionIndex]) {
+                        items[activeSuggestionIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'Enter') {
+                    if (activeSuggestionIndex >= 0 && items[activeSuggestionIndex]) {
+                        e.preventDefault();
+                        items[activeSuggestionIndex].click();
+                    } else {
+                        dropdown.style.display = 'none';
+                    }
+                } else if (e.key === 'Escape') {
+                    dropdown.style.display = 'none';
+                    activeSuggestionIndex = -1;
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const navSearch = document.querySelector('.nav-search');
+                if (navSearch && !navSearch.contains(e.target)) {
+                    if (dropdown) dropdown.style.display = 'none';
+                    activeSuggestionIndex = -1;
+                }
             });
         }
 
