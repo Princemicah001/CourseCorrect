@@ -663,6 +663,15 @@
     </div>
 
     <script>
+        function getApiBase() {
+            if (window.location.protocol === 'file:') return 'http://localhost:3000';
+            if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000') {
+                return 'http://localhost:3000';
+            }
+            return '';
+        }
+        const API_BASE = getApiBase();
+
         let materialsList = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -687,7 +696,7 @@
 
         async function loadOrders() {
             try {
-                const res = await fetch('/api/orders');
+                const res = await fetch(`${API_BASE}/api/orders`);
                 const data = await res.json();
                 document.getElementById('statRevenue').innerText = `KES ${data.totalRevenue.toLocaleString()}`;
                 document.getElementById('statPaidOrders').innerText = data.totalSuccess;
@@ -722,13 +731,13 @@
             try {
                 let data = null;
                 try {
-                    const res = await fetch('/api/materials');
+                    const res = await fetch(`${API_BASE}/api/materials`);
                     if (res.ok) data = await res.json();
                 } catch {}
 
                 if (!data || !data.materials) {
                     try {
-                        const staticRes = await fetch('/data/materials.json');
+                        const staticRes = await fetch(`${API_BASE}/data/materials.json`);
                         if (staticRes.ok) {
                             const raw = await staticRes.json();
                             data = { materials: raw };
@@ -752,7 +761,7 @@
                         <td style="font-family:'JetBrains Mono'; font-weight:700;">KES ${m.price}</td>
                         <td>${m.hasSolutions ? '&#10003; Yes' : 'No'}</td>
                         <td>
-                            <a href="/api/documents/download/${m.id}?preview=1" target="_blank" style="color:var(--mpesa); font-weight:700; text-decoration:none; font-size:12px;">
+                            <a href="${API_BASE}/api/documents/download/${m.id}?preview=1" target="_blank" style="color:var(--mpesa); font-weight:700; text-decoration:none; font-size:12px;">
                                 View PDF
                             </a>
                         </td>
@@ -776,13 +785,13 @@
             try {
                 let data = null;
                 try {
-                    const res = await fetch('/api/config');
+                    const res = await fetch(`${API_BASE}/api/config`);
                     if (res.ok) data = await res.json();
                 } catch {}
 
                 if (!data) {
                     try {
-                        const staticRes = await fetch('/data/config.json');
+                        const staticRes = await fetch(`${API_BASE}/data/config.json`);
                         if (staticRes.ok) data = await staticRes.json();
                     } catch {}
                 }
@@ -835,7 +844,7 @@
             const resElem = document.getElementById('payheroConnectionResult');
             resElem.innerHTML = '<span style="color:#0052cc;">Testing PayHero credentials...</span>';
             try {
-                const res = await fetch('/api/payhero/channels');
+                const res = await fetch(`${API_BASE}/api/payhero/channels`);
                 const data = await res.json();
                 if (res.ok && data.channels && data.channels.length > 0) {
                     resElem.innerHTML = `<span style="color:#00875a; font-weight:700;">Live: Connected to Account #${data.accountId} (${data.channels.length} channels found)</span>`;
@@ -890,7 +899,7 @@
             };
 
             try {
-                const res = await fetch('/api/config', {
+                const res = await fetch(`${API_BASE}/api/config`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1023,7 +1032,7 @@
             };
 
             try {
-                const res = await fetch('/api/materials', {
+                const res = await fetch(`${API_BASE}/api/materials`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1067,7 +1076,7 @@
 
         function setupLiveUpdates() {
             try {
-                const evt = new EventSource('/api/stream');
+                const evt = new EventSource(`${API_BASE}/api/stream`);
                 evt.addEventListener('order-created', () => loadOrders());
                 evt.addEventListener('order-updated', () => loadOrders());
                 evt.addEventListener('material-added', () => loadCatalog());

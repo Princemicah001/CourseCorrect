@@ -3,11 +3,18 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/[...slug].js"
+      "destination": "/api/index.js?__route=$1"
+    },
+    {
+      "source": "/api",
+      "destination": "/api/index.js"
     }
   ],
   "functions": {
     "api/**/*.js": {
+      "includeFiles": "data/**,documents/**"
+    },
+    "api/*.js": {
       "includeFiles": "data/**,documents/**"
     }
   }

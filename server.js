@@ -508,11 +508,16 @@ async function handleRequest(request, response) {
         const requestUrl = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
         let pathname = requestUrl.pathname;
 
-        // Vercel serverless catch-all & query slug resolution
-        if (request.query && request.query.slug) {
-            const slugPath = Array.isArray(request.query.slug) ? request.query.slug.join('/') : request.query.slug;
-            pathname = `/api/${slugPath}`;
-        } else if (pathname === '/api/index.js' || pathname === '/api' || pathname === '/api/') {
+        // Vercel serverless rewrite, catch-all & query slug resolution
+        const routeParam = requestUrl.searchParams.get('__route') ||
+                           (request.query && request.query.__route) ||
+                           (request.query && (Array.isArray(request.query.slug) ? request.query.slug.join('/') : request.query.slug)) ||
+                           (request.query && (Array.isArray(request.query.path) ? request.query.path.join('/') : request.query.path));
+
+        if (routeParam) {
+            const clean = routeParam.startsWith('/') ? routeParam.slice(1) : routeParam;
+            pathname = `/api/${clean}`;
+        } else if (pathname === '/api/index.js' || pathname === '/api/index' || pathname === '/api' || pathname === '/api/') {
             const raw = request.headers['x-matched-path'] ||
                         request.headers['x-invoke-path'] ||
                         request.headers['x-forwarded-uri'] ||
@@ -520,9 +525,13 @@ async function handleRequest(request, response) {
                         request.headers['x-original-url'];
             if (raw && raw.startsWith('/api/') && !raw.startsWith('/api/index')) {
                 pathname = raw.split('?')[0];
-            } else if (pathname === '/api' || pathname === '/api/') {
+            } else {
                 pathname = '/api/materials';
             }
+        }
+
+        if (pathname.length > 1 && pathname.endsWith('/')) {
+            pathname = pathname.slice(0, -1);
         }
 
         const method = request.method;
@@ -1325,7 +1334,8 @@ async function handleRequest(request, response) {
                 'Content-Type': 'application/pdf',
                 'Content-Disposition': `attachment; filename="${downloadFileName}"`,
                 'Content-Length': fileData.length,
-                'Cache-Control': 'no-cache'
+                'Cache-Control': 'no-cache',
+                'Access-Control-Allow-Origin': '*'
             });
             return response.end(fileData);
         }
@@ -1348,7 +1358,8 @@ async function handleRequest(request, response) {
         const extension = path.extname(filePath).toLowerCase();
         response.writeHead(200, {
             'Content-Type': mimeTypes[extension] || 'application/octet-stream',
-            'Cache-Control': extension === '.html' ? 'no-cache' : 'public, max-age=3600'
+            'Cache-Control': extension === '.html' ? 'no-cache' : 'public, max-age=3600',
+            'Access-Control-Allow-Origin': '*'
         });
         response.end(data);
     } catch (error) {

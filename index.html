@@ -2230,6 +2230,16 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+        // API Base resolver: auto-proxies to backend when running on Live Server, file://, or other dev ports
+        function getApiBase() {
+            if (window.location.protocol === 'file:') return 'http://localhost:3000';
+            if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000') {
+                return 'http://localhost:3000';
+            }
+            return '';
+        }
+        const API_BASE = getApiBase();
+
         // Global State
         let allMaterials = [];
         let foldersTree = [];
@@ -2284,7 +2294,7 @@
                 let data = null;
                 // Attempt 1: Fetch from /api/materials (Server / Vercel Serverless Function)
                 try {
-                    const res = await fetch('/api/materials');
+                    const res = await fetch(`${API_BASE}/api/materials`);
                     if (res.ok) {
                         const parsed = await res.json();
                         if (parsed && Array.isArray(parsed.materials) && parsed.materials.length > 0) {
@@ -2298,7 +2308,7 @@
                 // Attempt 2 (Fallback): If /api/materials failed or returned empty (e.g. static Vercel hosting)
                 if (!data) {
                     try {
-                        const staticRes = await fetch('/data/materials.json');
+                        const staticRes = await fetch(`${API_BASE}/data/materials.json`);
                         if (staticRes.ok) {
                             const rawItems = await staticRes.json();
                             if (Array.isArray(rawItems) && rawItems.length > 0) {
@@ -3075,7 +3085,7 @@
 
             try {
                 showToast('Initiating M-Pesa STK Push...', 'info');
-                const res = await fetch('/api/mpesa/stkpush', {
+                const res = await fetch(`${API_BASE}/api/mpesa/stkpush`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -3141,7 +3151,7 @@
 
             try {
                 showToast('Processing M-Pesa PIN...', 'info');
-                const res = await fetch('/api/mpesa/simulate-pin', {
+                const res = await fetch(`${API_BASE}/api/mpesa/simulate-pin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -3164,7 +3174,7 @@
         async function cancelSimulatedPayment() {
             if (!currentActiveOrder) return;
             try {
-                const res = await fetch('/api/mpesa/simulate-pin', {
+                const res = await fetch(`${API_BASE}/api/mpesa/simulate-pin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -3189,7 +3199,7 @@
             showToast('Checking payment status with PayHero / M-Pesa...', 'info');
             try {
                 const qs = currentActiveOrder ? `?amount=${currentActiveOrder.amount || 0}&createdAt=${encodeURIComponent(currentActiveOrder.createdAt || '')}&provider=${currentActiveOrder.provider || 'payhero'}&docIds=${(currentActiveOrder.documentIds || []).join(',')}` : '';
-                const res = await fetch(`/api/mpesa/status/${currentActiveOrder.orderId}${qs}`);
+                const res = await fetch(`${API_BASE}/api/mpesa/status/${currentActiveOrder.orderId}${qs}`);
                 if (!res.ok) {
                     showToast('Payment not yet detected. Please ensure you entered your PIN.', 'info');
                     return;
@@ -3228,7 +3238,7 @@
                 }
                 try {
                     const qs = currentActiveOrder ? `?amount=${currentActiveOrder.amount || 0}&createdAt=${encodeURIComponent(currentActiveOrder.createdAt || '')}&provider=${currentActiveOrder.provider || 'payhero'}&docIds=${(currentActiveOrder.documentIds || []).join(',')}` : '';
-                    const res = await fetch(`/api/mpesa/status/${orderId}${qs}`);
+                    const res = await fetch(`${API_BASE}/api/mpesa/status/${orderId}${qs}`);
                     if (!res.ok) return;
                     const order = await res.json();
                     if (order.status === 'COMPLETED') {
@@ -3270,7 +3280,7 @@
             }
 
             docs.forEach(doc => {
-                const dlUrl = `/api/documents/download/${doc.id}?token=${order.downloadToken}&orderId=${order.orderId}`;
+                const dlUrl = `${API_BASE}/api/documents/download/${doc.id}?token=${order.downloadToken}&orderId=${order.orderId}`;
                 const btn = document.createElement('a');
                 btn.className = 'btn btn-primary';
                 btn.href = dlUrl;
@@ -3346,7 +3356,7 @@
 
             try {
                 showToast('Searching purchased materials...', 'info');
-                const res = await fetch(`/api/student/purchases?${param}`);
+                const res = await fetch(`${API_BASE}/api/student/purchases?${param}`);
                 const data = await res.json();
                 const container = document.getElementById('lookupResultsContainer');
                 container.innerHTML = '';
@@ -3384,7 +3394,7 @@
         function setupLiveUpdates() {
             if (!window.EventSource) return;
             try {
-                const evtSource = new EventSource('/api/stream');
+                const evtSource = new EventSource(`${API_BASE}/api/stream`);
                 evtSource.addEventListener('order-updated', e => {
                     const order = JSON.parse(e.data);
                     if (currentActiveOrder && currentActiveOrder.orderId === order.orderId) {
