@@ -58,7 +58,7 @@ async function audit(admin, action, id, details = {}) {
 }
 const SELECT = "SELECT d.*,u.name university_name,cp.name campus_name,f.name faculty_name,c.name course_name,un.name unit_name,un.code unit_code FROM documents d JOIN universities u ON u.id=d.university_id LEFT JOIN campuses cp ON cp.id=d.campus_id LEFT JOIN faculties f ON f.id=d.faculty_id LEFT JOIN courses c ON c.id=d.course_id LEFT JOIN units un ON un.id=d.unit_id";
 function shape(d) {
-  return { id:d.id,title:d.title,description:d.description,type:d.document_type,academicYear:d.academic_year,semester:d.semester,examSession:d.exam_session,fileName:d.original_file_name,fileSize:Number(d.file_size_bytes || 0),previewUrl:d.preview_image_url,downloadUrl:'/api/documents/'+d.id+'/download',accessTier:d.access_tier,price:Number(d.price_minor || 0)/100,downloadCount:Number(d.download_count || 0),university:d.university_name,campus:d.campus_name,faculty:d.faculty_name,course:d.course_name,unit:d.unit_name,unitCode:d.unit_code,createdAt:d.created_at };
+  return { id:d.id,title:d.title,description:d.description,type:d.document_type,academicYear:d.academic_year,semester:d.semester,examSession:d.exam_session,fileName:d.original_file_name,fileSize:Number(d.file_size_bytes || 0),previewUrl:d.preview_image_url,previewDocumentUrl:'/api/documents/'+d.id+'/preview',downloadUrl:'/api/documents/'+d.id+'/download',accessTier:d.access_tier,price:Number(d.price_minor || 0)/100,downloadCount:Number(d.download_count || 0),university:d.university_name,campus:d.campus_name,faculty:d.faculty_name,course:d.course_name,unit:d.unit_name,unitCode:d.unit_code,createdAt:d.created_at };
 }
 async function ensureNamed(client, table, universityId, name) {
   if (!name) return null;
@@ -176,12 +176,12 @@ module.exports = async function handle(req,res,pathname,url) {
       try{await cloudinary.uploader.destroy(old.rows[0].cloudinary_public_id,{resource_type:'raw',invalidate:true});}catch(e){console.error('[Cloudinary] delete:',e.message);}
       reply(res,200,{success:true});return true;
     }
-    const download=pathname.match(/^\/api\/documents\/([0-9a-f-]+)\/download$/i);
-    if(download && method==='GET'){
-      const doc=await query("SELECT cloudinary_url,access_tier,status FROM documents WHERE id=$1",[download[1]]);
+    const documentAction=pathname.match(/^\/api\/documents\/([0-9a-f-]+)\/(download|preview)$/i);
+    if(documentAction && method==='GET'){
+      const doc=await query("SELECT cloudinary_url,access_tier,status FROM documents WHERE id=$1",[documentAction[1]]);
       if(!doc.rowCount || doc.rows[0].status!=='published'){reply(res,404,{error:'Document not found.'});return true;}
       if(doc.rows[0].access_tier!=='free'){reply(res,402,{error:'This resource is not available in the free launch.'});return true;}
-      await query('UPDATE documents SET download_count=download_count+1 WHERE id=$1',[download[1]]);
+      if(documentAction[2]==='download')await query('UPDATE documents SET download_count=download_count+1 WHERE id=$1',[documentAction[1]]);
       res.writeHead(302,{Location:doc.rows[0].cloudinary_url,'Cache-Control':'no-store'});res.end();return true;
     }
     reply(res,405,{error:'Method not allowed.'});return true;
