@@ -51,14 +51,14 @@ for (const relative of htmlFiles) {
   const file = path.join(root, relative);
   if (!fs.existsSync(file)) continue;
   const html = fs.readFileSync(file, 'utf8');
-  const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)];
+  const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
   scripts.forEach((match, index) => {
     if (match[1].trim()) checkJavaScript(relative + ' inline script ' + (index + 1), match[1]);
   });
 }
 
 if (errors.length) {
-  console.error('\\nValidation failed with ' + errors.length + ' error(s).');
+  console.error('\nValidation failed with ' + errors.length + ' error(s).');
   process.exit(1);
 }
-console.log('\\nCourseCorrect validation passed.');
+console.log('\nCourseCorrect validation passed.');
