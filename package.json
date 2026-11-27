@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node generate_catalog.js",
-    "db:migrate": "psql \"$DATABASE_URL\" -f db/schema.sql"
+    "db:migrate": "node db/migrate.js"
   },
   "keywords": [
     "university",
