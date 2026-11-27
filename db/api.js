@@ -130,7 +130,7 @@ module.exports = async function handle(req,res,pathname,url) {
       const limit=Math.min(100,Math.max(1,Number(url.searchParams.get('limit'))||100));
       const offset=Math.max(0,Number(url.searchParams.get('offset'))||0);
       const pageValues=values.concat([limit,offset]);
-      const result=await query(SELECT+' WHERE '+filters.join(' AND ')+' ORDER BY d.created_at DESC LIMIT 
+      const result=await query(SELECT+' WHERE '+filters.join(' AND ')+' ORDER BY d.created_at DESC LIMIT $'+(values.length+1)+' OFFSET $'+(values.length+2),pageValues);
       const facets=await query("SELECT u.name university,f.name faculty,d.document_type type,COUNT(*)::int count FROM documents d JOIN universities u ON u.id=d.university_id LEFT JOIN faculties f ON f.id=d.faculty_id WHERE d.status='published' GROUP BY u.name,f.name,d.document_type ORDER BY u.name,f.name,d.document_type");
       reply(res,200,{total:count.rows[0].total,documents:result.rows.map(shape),facets:facets.rows,offset,limit,hasMore:offset+result.rowCount<count.rows[0].total}); return true;
     }
