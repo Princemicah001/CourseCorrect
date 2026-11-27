@@ -162,56 +162,97 @@ module.exports = async function handle(req,res,pathname,url) {
     }
     const idMatch=pathname.match(/^\/api\/admin\/documents\/([0-9a-f-]+)$/i);
     if(idMatch && method==='PATCH'){
-      const admin=await requireAdmin(req,res);if(!admin)return true;const input=await body(req,12000);
-      const allowed=['title','description','document_type','academic_year','semester','exam_session','status','access_tier','price_minor'],sets=[],vals=[];
-      const enums={document_type:['past_paper','cat','assignment','notes','marking_scheme','revision','other'],status:['draft','published','archived'],access_tier:['free','paid']};
-      for(const key of allowed)if(input[key]!==undefined){if(enums[key]&&!enums[key].includes(input[key])){reply(res,400,{error:'Invalid value for '+key+'.'});return true;}if(key==='title'&&!String(input[key]).trim()){reply(res,400,{error:'Title cannot be empty.'});return true;}if(key==='academic_year'&&input[key]!==null&&(Number(input[key])<1900||Number(input[key])>2200)){reply(res,400,{error:'Academic year must be between 1900 and 2200.'});return true;}if(key==='semester'&&input[key]!==null&&!([1,2,3].includes(Number(input[key])))){reply(res,400,{error:'Semester must be 1, 2 or 3.'});return true;}if(key==='price_minor'&&(!Number.isInteger(Number(input[key]))||Number(input[key])<0)){reply(res,400,{error:'Price must be a non-negative integer.'});return true;}vals.push(input[key]);sets.push(key+'=
-      if(!sets.length){reply(res,400,{error:'No editable fields supplied.'});return true;}
-      vals.push(idMatch[1]);const changed=await query('UPDATE documents SET '+sets.join(',')+',updated_at=NOW() WHERE id=$'+vals.length+' RETURNING id',vals);
-      if(!changed.rowCount){reply(res,404,{error:'Document not found.'});return true;}
-      await audit(admin,'document.update',idMatch[1],input);const doc=await query(SELECT+' WHERE d.id=$1',[idMatch[1]]);reply(res,200,{success:true,document:shape(doc.rows[0])});return true;
+      const admin=await requireAdmin(req,res);
+      if(!admin)return true;
+      const input=await body(req,12000);
+      const allowed=['title','description','document_type','academic_year','semester','exam_session','status','access_tier','price_minor'];
+      const sets=[],vals=[];
+      const enums={
+        document_type:['past_paper','cat','assignment','notes','marking_scheme','revision','other'],
+        status:['draft','published','archived'],
+        access_tier:['free','paid']
+      };
+      for(const key of allowed){
+        if(input[key]===undefined)continue;
+        if(enums[key]&&!enums[key].includes(input[key])){
+          reply(res,400,{error:'Invalid value for '+key+'.'});
+          return true;
+        }
+        if(key==='title'&&!String(input[key]).trim()){
+          reply(res,400,{error:'Title cannot be empty.'});
+          return true;
+        }
+        if(key==='academic_year'&&input[key]!==null&&(Number(input[key])<1900||Number(input[key])>2200)){
+          reply(res,400,{error:'Academic year must be between 1900 and 2200.'});
+          return true;
+        }
+        if(key==='semester'&&input[key]!==null&&![1,2,3].includes(Number(input[key]))){
+          reply(res,400,{error:'Semester must be 1, 2 or 3.'});
+          return true;
+        }
+        if(key==='price_minor'&&(!Number.isInteger(Number(input[key]))||Number(input[key])<0)){
+          reply(res,400,{error:'Price must be a non-negative integer.'});
+          return true;
+        }
+        vals.push(input[key]);
+        sets.push(key+'=$'+vals.length);
+      }
+      if(!sets.length){
+        reply(res,400,{error:'No editable fields supplied.'});
+        return true;
+      }
+      vals.push(idMatch[1]);
+      const changed=await query('UPDATE documents SET '+sets.join(',')+',updated_at=NOW() WHERE id=$'+vals.length+' RETURNING id',vals);
+      if(!changed.rowCount){
+        reply(res,404,{error:'Document not found.'});
+        return true;
+      }
+      await audit(admin,'document.update',idMatch[1],input);
+      const doc=await query(SELECT+' WHERE d.id=$1',[idMatch[1]]);
+      reply(res,200,{success:true,document:shape(doc.rows[0])});
+      return true;
     }
     if(idMatch && method==='DELETE'){
-      const admin=await requireAdmin(req,res);if(!admin)return true;
+      const admin=await requireAdmin(req,res);
+      if(!admin)return true;
       const old=await query('SELECT cloudinary_public_id FROM documents WHERE id=$1',[idMatch[1]]);
-      if(!old.rowCount){reply(res,404,{error:'Document not found.'});return true;}
-      await query('DELETE FROM documents WHERE id=$1',[idMatch[1]]);await audit(admin,'document.delete',idMatch[1]);
-      try{await cloudinary.uploader.destroy(old.rows[0].cloudinary_public_id,{resource_type:'raw',invalidate:true});}catch(e){console.error('[Cloudinary] delete:',e.message);}
-      reply(res,200,{success:true});return true;
+      if(!old.rowCount){
+        reply(res,404,{error:'Document not found.'});
+        return true;
+      }
+      await query('DELETE FROM documents WHERE id=$1',[idMatch[1]]);
+      await audit(admin,'document.delete',idMatch[1]);
+      try{
+        await cloudinary.uploader.destroy(old.rows[0].cloudinary_public_id,{resource_type:'raw',invalidate:true});
+      }catch(e){
+        console.error('[Cloudinary] delete:',e.message);
+      }
+      reply(res,200,{success:true});
+      return true;
     }
     const documentAction=pathname.match(/^\/api\/documents\/([0-9a-f-]+)\/(download|preview)$/i);
     if(documentAction && method==='GET'){
-      const doc=await query("SELECT cloudinary_url,access_tier,status FROM documents WHERE id=$1",[documentAction[1]]);
-      if(!doc.rowCount || doc.rows[0].status!=='published'){reply(res,404,{error:'Document not found.'});return true;}
-      if(doc.rows[0].access_tier!=='free'){reply(res,402,{error:'This resource is not available in the free launch.'});return true;}
-      if(documentAction[2]==='download')await query('UPDATE documents SET download_count=download_count+1 WHERE id=$1',[documentAction[1]]);
-      res.writeHead(302,{Location:doc.rows[0].cloudinary_url,'Cache-Control':'no-store'});res.end();return true;
+      const doc=await query('SELECT cloudinary_url,access_tier,status FROM documents WHERE id=$1',[documentAction[1]]);
+      if(!doc.rowCount || doc.rows[0].status!=='published'){
+        reply(res,404,{error:'Document not found.'});
+        return true;
+      }
+      if(doc.rows[0].access_tier!=='free'){
+        reply(res,402,{error:'This resource is not available in the free launch.'});
+        return true;
+      }
+      if(documentAction[2]==='download'){
+        await query('UPDATE documents SET download_count=download_count+1 WHERE id=$1',[documentAction[1]]);
+      }
+      res.writeHead(302,{Location:doc.rows[0].cloudinary_url,'Cache-Control':'no-store'});
+      res.end();
+      return true;
     }
-    reply(res,405,{error:'Method not allowed.'});return true;
-  } catch(error){console.error('[CourseCorrect API]',error.message);reply(res,error.status||500,{error:error.status?error.message:'The request could not be completed.'});return true;}
-};
-+vals.length);}
-      if(!sets.length){reply(res,400,{error:'No editable fields supplied.'});return true;}
-      vals.push(idMatch[1]);const changed=await query('UPDATE documents SET '+sets.join(',')+',updated_at=NOW() WHERE id=$'+vals.length+' RETURNING id',vals);
-      if(!changed.rowCount){reply(res,404,{error:'Document not found.'});return true;}
-      await audit(admin,'document.update',idMatch[1],input);const doc=await query(SELECT+' WHERE d.id=$1',[idMatch[1]]);reply(res,200,{success:true,document:shape(doc.rows[0])});return true;
-    }
-    if(idMatch && method==='DELETE'){
-      const admin=await requireAdmin(req,res);if(!admin)return true;
-      const old=await query('SELECT cloudinary_public_id FROM documents WHERE id=$1',[idMatch[1]]);
-      if(!old.rowCount){reply(res,404,{error:'Document not found.'});return true;}
-      await query('DELETE FROM documents WHERE id=$1',[idMatch[1]]);await audit(admin,'document.delete',idMatch[1]);
-      try{await cloudinary.uploader.destroy(old.rows[0].cloudinary_public_id,{resource_type:'raw',invalidate:true});}catch(e){console.error('[Cloudinary] delete:',e.message);}
-      reply(res,200,{success:true});return true;
-    }
-    const documentAction=pathname.match(/^\/api\/documents\/([0-9a-f-]+)\/(download|preview)$/i);
-    if(documentAction && method==='GET'){
-      const doc=await query("SELECT cloudinary_url,access_tier,status FROM documents WHERE id=$1",[documentAction[1]]);
-      if(!doc.rowCount || doc.rows[0].status!=='published'){reply(res,404,{error:'Document not found.'});return true;}
-      if(doc.rows[0].access_tier!=='free'){reply(res,402,{error:'This resource is not available in the free launch.'});return true;}
-      if(documentAction[2]==='download')await query('UPDATE documents SET download_count=download_count+1 WHERE id=$1',[documentAction[1]]);
-      res.writeHead(302,{Location:doc.rows[0].cloudinary_url,'Cache-Control':'no-store'});res.end();return true;
-    }
-    reply(res,405,{error:'Method not allowed.'});return true;
-  } catch(error){console.error('[CourseCorrect API]',error.message);reply(res,error.status||500,{error:error.status?error.message:'The request could not be completed.'});return true;}
+    reply(res,405,{error:'Method not allowed.'});
+    return true;
+  } catch(error){
+    console.error('[CourseCorrect API]',error.message);
+    reply(res,error.status||500,{error:error.status?error.message:'The request could not be completed.'});
+    return true;
+  }
 };
