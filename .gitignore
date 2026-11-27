@@ -17,3 +17,7 @@ Thumbs.db
 # Runtime temp files
 *.tmp
 data/*.tmp
+
+# Private runtime data (legacy JSON store)
+data/config.json
+data/orders.json
