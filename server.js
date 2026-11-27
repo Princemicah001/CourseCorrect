@@ -1390,9 +1390,9 @@ if (require.main === module) {
     server.listen(port, () => {
         console.log(`========================================================`);
         console.log(`Course Correct Student Portal : http://localhost:${port}`);
-        console.log(`Vendor & Admin Console : http://localhost:${port}/vender.html`);
+        console.log(`Admin Workspace        : http://localhost:${port}/admin.html`);
         console.log(`API Base               : http://localhost:${port}/api/materials`);
-        console.log(`M-Pesa Engine          : Third-Party Direct-to-Phone (PayHero, TinyPesa, IntaSend)`);
+        console.log(`Launch Mode            : Free academic resource library`);
         console.log(`========================================================`);
     });
 }
