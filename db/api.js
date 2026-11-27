@@ -66,6 +66,7 @@ async function ensureNamed(client, table, universityId, name) {
   return result.rows[0].id;
 }
 async function uploadDocument(admin, data) {
+  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required.');
   if (!String(data.title || '').trim()) throw Object.assign(new Error('Document title is required.'), { status:400 });
   const publicId = String(data.cloudinaryPublicId || '');
   if (!publicId.startsWith('coursecorrect/')) throw Object.assign(new Error('Upload the PDF through the signed upload flow first.'), { status:400 });
