@@ -65,7 +65,7 @@ University
                         └── PDF document
 ```
 
-The catalogue tables are relational rather than filesystem folders. Documents keep their Cloudinary asset identifiers and URLs in PostgreSQL. A university and its related catalogue records are created as administrators add resources.
+The public catalogue is returned in pages of up to 100 resources. The admin folder explorer groups records through the university, campus, faculty, course and unit hierarchy. The catalogue tables are relational rather than filesystem folders. Documents keep their Cloudinary asset identifiers and URLs in PostgreSQL. A university and its related catalogue records are created as administrators add resources.
 
 ## API overview
 
@@ -78,6 +78,7 @@ The catalogue tables are relational rather than filesystem folders. Documents ke
 | `POST /api/admin/logout` | End administrator session |
 | `POST /api/admin/upload-signature` | Generate a short-lived signed Cloudinary upload request |
 | `GET /api/admin/documents` | List catalogue documents |
+| `GET /api/admin/activity` | Review recent administrator actions |
 | `POST /api/admin/documents` | Save metadata for a verified Cloudinary PDF |
 | `PATCH /api/admin/documents/:id` | Edit document metadata or publication status |
 | `DELETE /api/admin/documents/:id` | Delete document metadata and its Cloudinary asset |
