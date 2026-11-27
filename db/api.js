@@ -145,6 +145,11 @@ module.exports = async function handle(req,res,pathname,url) {
       const signature=cloudinary.utils.api_sign_request(params,process.env.CLOUDINARY_API_SECRET);
       reply(res,200,{cloudName:process.env.CLOUDINARY_CLOUD_NAME,apiKey:process.env.CLOUDINARY_API_KEY,timestamp,publicId,signature,resourceType:'raw',tags:params.tags});return true;
     }
+    if(pathname==='/api/admin/activity' && method==='GET'){
+      const admin=await requireAdmin(req,res);if(!admin)return true;
+      const rows=await query("SELECT l.action,l.entity_type,l.entity_id,l.details,l.created_at,a.display_name FROM admin_audit_logs l LEFT JOIN admins a ON a.id=l.admin_id ORDER BY l.created_at DESC LIMIT 100");
+      reply(res,200,{activity:rows.rows});return true;
+    }
     if(pathname==='/api/admin/documents' && method==='GET'){
       const admin=await requireAdmin(req,res);if(!admin)return true;
       const docs=await query(SELECT+' ORDER BY d.created_at DESC LIMIT 250');reply(res,200,{documents:docs.rows.map(shape)});return true;
