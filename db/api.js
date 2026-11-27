@@ -67,14 +67,13 @@ async function ensureNamed(client, table, universityId, name) {
 }
 async function uploadDocument(admin, data) {
   if (!String(data.title || '').trim()) throw Object.assign(new Error('Document title is required.'), { status:400 });
-  const match = String(data.fileBase64 || '').match(/^data:application\/pdf;base64,([A-Za-z0-9+/=\r\n]+)$/);
-  if (!match) throw Object.assign(new Error('Select a valid PDF document.'), { status:400 });
-  const file = Buffer.from(match[1].replace(/\s/g,''), 'base64');
-  if (!file.length || file.length > MAX_BYTES) throw Object.assign(new Error('PDF must be smaller than 20 MB.'), { status:413 });
-  if (file.subarray(0,5).toString() !== '%PDF-') throw Object.assign(new Error('The selected file is not a valid PDF.'), { status:400 });
-
+  const publicId = String(data.cloudinaryPublicId || '');
+  if (!publicId.startsWith('coursecorrect/')) throw Object.assign(new Error('Upload the PDF through the signed upload flow first.'), { status:400 });
+  const asset = await cloudinary.api.resource(publicId, { resource_type:'raw' });
+  if (!asset || asset.resource_type !== 'raw' || Number(asset.bytes) > MAX_BYTES || !String(asset.format || '').toLowerCase().includes('pdf')) {
+    throw Object.assign(new Error('Cloudinary asset is not an accepted PDF.'), { status:400 });
+  }
   const client = await pool.connect();
-  let asset;
   try {
     await client.query('BEGIN');
     const universityName = String(data.university || 'Mount Kenya University').trim();
@@ -91,17 +90,14 @@ async function uploadDocument(admin, data) {
       const unit = await client.query('INSERT INTO units(course_id,code,name,slug,year_of_study,semester) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(course_id,slug) DO UPDATE SET code=EXCLUDED.code,name=EXCLUDED.name RETURNING id', [courseId,data.unitCode || null,String(data.unit).trim(),slug(data.unit),data.yearOfStudy || null,data.semester || null]);
       unitId = unit.rows[0].id;
     }
-    const publicId = 'coursecorrect/'+slug(universityName)+'/'+Date.now()+'-'+crypto.randomBytes(5).toString('hex');
-    asset = await cloudinary.uploader.upload('data:application/pdf;base64,'+file.toString('base64'), { resource_type:'raw',public_id:publicId,unique_filename:false,overwrite:false,tags:['coursecorrect','academic-resource'] });
     const types = ['past_paper','cat','assignment','notes','marking_scheme','revision','other'];
     const docType = types.includes(data.type) ? data.type : 'other';
-    const inserted = await client.query("INSERT INTO documents(university_id,campus_id,faculty_id,course_id,unit_id,title,description,document_type,academic_year,semester,exam_session,original_file_name,mime_type,file_size_bytes,cloudinary_public_id,cloudinary_asset_id,cloudinary_url,preview_image_url,access_tier,price_minor,status,uploaded_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'application/pdf',$13,$14,$15,$16,$17,'free',0,'published',$18) RETURNING id", [universityId,campusId,facultyId,courseId,unitId,String(data.title).trim(),data.description || null,docType,Number(data.academicYear)||new Date().getFullYear(),Number(data.semester)||null,data.examSession||null,String(data.fileName||'resource.pdf').replace(/[^\w.\- ()]/g,'_'),file.length,asset.public_id,asset.asset_id,asset.secure_url,data.previewImageUrl||null,admin.id]);
+    const inserted = await client.query("INSERT INTO documents(university_id,campus_id,faculty_id,course_id,unit_id,title,description,document_type,academic_year,semester,exam_session,original_file_name,mime_type,file_size_bytes,cloudinary_public_id,cloudinary_asset_id,cloudinary_url,preview_image_url,access_tier,price_minor,status,uploaded_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'application/pdf',$13,$14,$15,$16,$17,'free',0,'published',$18) RETURNING id", [universityId,campusId,facultyId,courseId,unitId,String(data.title).trim(),data.description || null,docType,Number(data.academicYear)||new Date().getFullYear(),Number(data.semester)||null,data.examSession||null,String(data.fileName||'resource.pdf').replace(/[^\w.\- ()]/g,'_'),Number(asset.bytes),asset.public_id,asset.asset_id,asset.secure_url,data.previewImageUrl||null,admin.id]);
     await audit(admin,'document.create',inserted.rows[0].id,{title:data.title});
     await client.query('COMMIT');
     return inserted.rows[0].id;
   } catch (error) {
     await client.query('ROLLBACK');
-    if (asset && asset.public_id) { try { await cloudinary.uploader.destroy(asset.public_id,{resource_type:'raw',invalidate:true}); } catch {} }
     throw error;
   } finally { client.release(); }
 }
@@ -139,6 +135,15 @@ module.exports = async function handle(req,res,pathname,url) {
     }
     if(pathname==='/api/admin/me' && method==='GET'){
       const admin=await adminFor(req);reply(res,admin?200:401,admin?{admin:{email:admin.email,name:admin.display_name,role:admin.role}}:{error:'Not signed in.'});return true;
+    }
+    if(pathname==='/api/admin/upload-signature' && method==='POST'){
+      const admin=await requireAdmin(req,res);if(!admin)return true;
+      if(!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) throw new Error('Cloudinary environment variables are not configured.');
+      const timestamp=Math.floor(Date.now()/1000);
+      const publicId='coursecorrect/uploads/'+Date.now()+'-'+crypto.randomBytes(6).toString('hex');
+      const params={public_id:publicId,timestamp:timestamp,tags:'coursecorrect,academic-resource'};
+      const signature=cloudinary.utils.api_sign_request(params,process.env.CLOUDINARY_API_SECRET);
+      reply(res,200,{cloudName:process.env.CLOUDINARY_CLOUD_NAME,apiKey:process.env.CLOUDINARY_API_KEY,timestamp,publicId,signature,resourceType:'raw',tags:params.tags});return true;
     }
     if(pathname==='/api/admin/documents' && method==='GET'){
       const admin=await requireAdmin(req,res);if(!admin)return true;
