@@ -74,6 +74,10 @@ async function ensureNamed(client, table, universityId, name) {
 async function uploadDocument(admin, data) {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required.');
   if (!String(data.title || '').trim()) throw Object.assign(new Error('Document title is required.'), { status:400 });
+  const academicYear=Number(data.academicYear)||new Date().getFullYear();
+  const semester=Number(data.semester)||null;
+  if(academicYear<1900||academicYear>2200) throw Object.assign(new Error('Academic year must be between 1900 and 2200.'),{status:400});
+  if(semester!==null&&![1,2,3].includes(semester)) throw Object.assign(new Error('Semester must be 1, 2 or 3.'),{status:400});
   const publicId = String(data.cloudinaryPublicId || '');
   if (!publicId.startsWith('coursecorrect/')) throw Object.assign(new Error('Upload the PDF through the signed upload flow first.'), { status:400 });
   const asset = await cloudinary.api.resource(publicId, { resource_type:'raw' });
@@ -100,7 +104,7 @@ async function uploadDocument(admin, data) {
     }
     const types = ['past_paper','cat','assignment','notes','marking_scheme','revision','other'];
     const docType = types.includes(data.type) ? data.type : 'other';
-    const inserted = await client.query("INSERT INTO documents(university_id,campus_id,faculty_id,course_id,unit_id,title,description,document_type,academic_year,semester,exam_session,original_file_name,mime_type,file_size_bytes,cloudinary_public_id,cloudinary_asset_id,cloudinary_url,preview_image_url,access_tier,price_minor,status,uploaded_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'application/pdf',$13,$14,$15,$16,$17,'free',0,'published',$18) RETURNING id", [universityId,campusId,facultyId,courseId,unitId,String(data.title).trim(),data.description || null,docType,Number(data.academicYear)||new Date().getFullYear(),Number(data.semester)||null,data.examSession||null,String(data.fileName||'resource.pdf').replace(/[^\w.\- ()]/g,'_'),Number(asset.bytes),asset.public_id,asset.asset_id,asset.secure_url,data.previewImageUrl||null,admin.id]);
+    const inserted = await client.query("INSERT INTO documents(university_id,campus_id,faculty_id,course_id,unit_id,title,description,document_type,academic_year,semester,exam_session,original_file_name,mime_type,file_size_bytes,cloudinary_public_id,cloudinary_asset_id,cloudinary_url,preview_image_url,access_tier,price_minor,status,uploaded_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'application/pdf',$13,$14,$15,$16,$17,'free',0,'published',$18) RETURNING id", [universityId,campusId,facultyId,courseId,unitId,String(data.title).trim(),data.description || null,docType,academicYear,semester,data.examSession||null,String(data.fileName||'resource.pdf').replace(/[^\w.\- ()]/g,'_'),Number(asset.bytes),asset.public_id,asset.asset_id,asset.secure_url,data.previewImageUrl||null,admin.id]);
     await audit(admin,'document.create',inserted.rows[0].id,{title:data.title});
     await client.query('COMMIT');
     return inserted.rows[0].id;
