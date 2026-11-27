@@ -115,8 +115,9 @@ module.exports = async function handle(req,res,pathname,url) {
       const type=url.searchParams.get('type'); if(type){values.push(type);filters.push('d.document_type=$'+values.length);}
       const year=Number(url.searchParams.get('year')); if(year){values.push(year);filters.push('d.academic_year=$'+values.length);}
       const result=await query(SELECT+' WHERE '+filters.join(' AND ')+' ORDER BY d.created_at DESC LIMIT 100',values);
+      const count=await query('SELECT COUNT(*)::int AS total FROM documents d JOIN universities u ON u.id=d.university_id WHERE '+filters.join(' AND '),values);
       const facets=await query("SELECT u.name university,f.name faculty,d.document_type type,COUNT(*)::int count FROM documents d JOIN universities u ON u.id=d.university_id LEFT JOIN faculties f ON f.id=d.faculty_id WHERE d.status='published' GROUP BY u.name,f.name,d.document_type ORDER BY u.name,f.name,d.document_type");
-      reply(res,200,{total:result.rowCount,documents:result.rows.map(shape),facets:facets.rows}); return true;
+      reply(res,200,{total:count.rows[0].total,documents:result.rows.map(shape),facets:facets.rows}); return true;
     }
     if(pathname==='/api/admin/login' && method==='POST'){
       await bootstrapAdmin(); const input=await body(req,12000);
