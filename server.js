@@ -4,7 +4,6 @@ const fsSync = require('fs');
 const path = require('path');
 const { URL } = require('url');
 const crypto = require('crypto');
-const handleCatalogApi = require('./db/api');
 
 // Load environment variables from .env
 function loadEnv() {
@@ -29,6 +28,9 @@ function loadEnv() {
     }
 }
 loadEnv();
+
+// Load runtime services only after local environment variables are available.
+const handleCatalogApi = require('./db/api');
 
 const port = Number(process.env.PORT) || 3000;
 const root = process.env.VERCEL ? process.cwd() : __dirname;
