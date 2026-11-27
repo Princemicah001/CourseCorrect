@@ -133,9 +133,10 @@ module.exports = async function handle(req,res,pathname,url) {
         filters.push("(d.title ILIKE $" + n + " OR d.description ILIKE $" + n + " OR d.original_file_name ILIKE $" + n + " OR EXISTS(SELECT 1 FROM units x WHERE x.id=d.unit_id AND (x.name ILIKE $" + n + " OR x.code ILIKE $" + n + ")) OR EXISTS(SELECT 1 FROM courses x WHERE x.id=d.course_id AND (x.name ILIKE $" + n + " OR x.code ILIKE $" + n + ")) OR EXISTS(SELECT 1 FROM faculties x WHERE x.id=d.faculty_id AND x.name ILIKE $" + n + ") OR EXISTS(SELECT 1 FROM campuses x WHERE x.id=d.campus_id AND x.name ILIKE $" + n + ") OR u.name ILIKE $" + n + ")");
       }
       const university = url.searchParams.get('university');
-      if (university) { values.push(university); filters.push('u.name=
+      if (university) { values.push(university); filters.push('u.name=$' + values.length); }
       const faculty = url.searchParams.get('faculty');
-      if (faculty) { values.push(faculty); filters.push('f.name=
+      if (faculty) { values.push(faculty); filters.push('f.name=$' + values.length); }
+      const type = url.searchParams.get('type');
       if (type) { values.push(type); filters.push('d.document_type=$' + values.length); }
       const year = Number(url.searchParams.get('year'));
       if (year) { values.push(year); filters.push('d.academic_year=$' + values.length); }
