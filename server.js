@@ -4,6 +4,7 @@ const fsSync = require('fs');
 const path = require('path');
 const { URL } = require('url');
 const crypto = require('crypto');
+const handleCatalogApi = require('./db/api');
 
 // Load environment variables from .env
 function loadEnv() {
@@ -539,6 +540,9 @@ async function handleRequest(request, response) {
         if (method === 'OPTIONS') {
             return send(response, 204, '');
         }
+
+        // PostgreSQL + Cloudinary catalogue and administrator API.
+        if (await handleCatalogApi(request, response, pathname, requestUrl)) return;
 
         // Favicon handler
         if (pathname === '/favicon.ico') {
