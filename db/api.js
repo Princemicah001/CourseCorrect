@@ -77,7 +77,7 @@ async function uploadDocument(admin, data) {
   const publicId = String(data.cloudinaryPublicId || '');
   if (!publicId.startsWith('coursecorrect/')) throw Object.assign(new Error('Upload the PDF through the signed upload flow first.'), { status:400 });
   const asset = await cloudinary.api.resource(publicId, { resource_type:'raw' });
-  if (!asset || asset.resource_type !== 'raw' || Number(asset.bytes) > MAX_BYTES || String(asset.format || '').toLowerCase() !== 'pdf') {
+  if (!asset || asset.resource_type !== 'raw' || Number(asset.bytes) > MAX_BYTES || (!String(asset.format || '').toLowerCase().includes('pdf') && !/\.pdf$/i.test(String(asset.public_id || publicId)))) {
     try { await cloudinary.uploader.destroy(publicId,{resource_type:'raw',invalidate:true}); } catch {}
     throw Object.assign(new Error('Cloudinary asset is not an accepted PDF.'), { status:400 });
   }
