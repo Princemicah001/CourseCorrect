@@ -1,9 +1,5 @@
 const { Pool } = require('pg');
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is required. Configure a PostgreSQL connection string in the deployment environment.');
-}
-
 const poolOptions = {
   connectionString: process.env.DATABASE_URL,
   max: Number(process.env.PG_POOL_MAX || 5),
@@ -20,10 +16,14 @@ pool.on('error', (error) => {
 });
 
 async function query(text, params) {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required. Configure PostgreSQL before using catalogue APIs.');
+  }
   return pool.query(text, params);
 }
 
 async function checkDatabase() {
+  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required.');
   const result = await query('SELECT NOW() AS database_time, current_database() AS database_name');
   return result.rows[0];
 }
