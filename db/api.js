@@ -141,7 +141,7 @@ module.exports = async function handle(req,res,pathname,url) {
       if (year) { values.push(year); filters.push('d.academic_year=$' + values.length); }
 
       const where = filters.join(' AND ');
-      const count = await query('SELECT COUNT(*)::int AS total FROM documents d JOIN universities u ON u.id=d.university_id WHERE ' + where, values);
+      const count = await query('SELECT COUNT(*)::int AS total FROM documents d JOIN universities u ON u.id=d.university_id LEFT JOIN faculties f ON f.id=d.faculty_id WHERE ' + where, values);
       const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit')) || 100));
       const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
       const pageValues = values.concat([limit, offset]);
