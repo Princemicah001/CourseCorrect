@@ -103,11 +103,11 @@ async function uploadDocument(admin, data) {
 }
 
 module.exports = async function handle(req,res,pathname,url) {
-  if (!pathname.startsWith('/api/catalog') && !pathname.startsWith('/api/admin') && !pathname.startsWith('/api/documents/')) return false;
+  if (pathname !== '/api/catalog' && pathname !== '/api/materials' && !pathname.startsWith('/api/admin') && !pathname.startsWith('/api/documents/')) return false;
   const method = req.method || 'GET';
   if (method === 'OPTIONS') { res.writeHead(204,{'Access-Control-Allow-Methods':'GET,POST,PATCH,DELETE,OPTIONS','Access-Control-Allow-Headers':'Content-Type'}); res.end(); return true; }
   try {
-    if (pathname === '/api/catalog' && method === 'GET') {
+    if ((pathname === '/api/catalog' || pathname === '/api/materials') && method === 'GET') {
       const values=[], filters=["d.status='published'"];
       const q=(url.searchParams.get('q')||'').trim();
       if(q){ values.push('%'+q+'%'); const n=values.length; filters.push("(d.title ILIKE $"+n+" OR d.description ILIKE $"+n+" OR d.original_file_name ILIKE $"+n+" OR EXISTS(SELECT 1 FROM units x WHERE x.id=d.unit_id AND (x.name ILIKE $"+n+" OR x.code ILIKE $"+n+")))"); }
@@ -127,11 +127,11 @@ module.exports = async function handle(req,res,pathname,url) {
       const token=crypto.randomBytes(32).toString('base64url'), hash=crypto.createHash('sha256').update(token).digest('hex');
       await query("INSERT INTO admin_sessions(admin_id,token_hash,expires_at) VALUES($1,$2,NOW()+INTERVAL '7 days')",[admin.id,hash]);
       await query('UPDATE admins SET last_login_at=NOW() WHERE id=$1',[admin.id]);
-      reply(res,200,{success:true,admin:{email:admin.email,name:admin.display_name,role:admin.role}},{'Set-Cookie':'cc_admin='+encodeURIComponent(token)+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800'});return true;
+      reply(res,200,{success:true,admin:{email:admin.email,name:admin.display_name,role:admin.role}},{'Set-Cookie':'cc_admin='+encodeURIComponent(token)+'; Path=/; HttpOnly; '+(process.env.VERCEL?'Secure; ':'')+'SameSite=Lax; Max-Age=604800'});return true;
     }
     if(pathname==='/api/admin/logout' && method==='POST'){
       const token=cookie(req);if(token)await query('DELETE FROM admin_sessions WHERE token_hash=$1',[crypto.createHash('sha256').update(token).digest('hex')]);
-      reply(res,200,{success:true},{'Set-Cookie':'cc_admin=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'});return true;
+      reply(res,200,{success:true},{'Set-Cookie':'cc_admin=; Path=/; HttpOnly; '+(process.env.VERCEL?'Secure; ':'')+'SameSite=Lax; Max-Age=0'});return true;
     }
     if(pathname==='/api/admin/me' && method==='GET'){
       const admin=await adminFor(req);reply(res,admin?200:401,admin?{admin:{email:admin.email,name:admin.display_name,role:admin.role}}:{error:'Not signed in.'});return true;
