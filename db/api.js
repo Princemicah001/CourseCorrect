@@ -24,6 +24,12 @@ function slug(value) {
   return String(value || '').normalize('NFKD').toLowerCase().replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 90);
 }
 function body(req, max = 30 * 1024 * 1024) {
+  if (req.body !== undefined && req.body !== null) {
+    if (typeof req.body === 'object') return Promise.resolve(req.body);
+    if (typeof req.body === 'string') {
+      try { return Promise.resolve(JSON.parse(req.body)); } catch {}
+    }
+  }
   return new Promise((resolve, reject) => {
     let raw = '';
     req.on('data', chunk => { raw += chunk; if (raw.length > max) reject(Object.assign(new Error('Request too large.'), { status: 413 })); });
