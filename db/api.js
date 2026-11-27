@@ -161,7 +161,7 @@ module.exports = async function handle(req,res,pathname,url) {
     const idMatch=pathname.match(/^\/api\/admin\/documents\/([0-9a-f-]+)$/i);
     if(idMatch && method==='PATCH'){
       const admin=await requireAdmin(req,res);if(!admin)return true;const input=await body(req,12000);
-      const allowed=['title','description','academic_year','semester','exam_session','status','access_tier','price_minor'],sets=[],vals=[];
+      const allowed=['title','description','document_type','academic_year','semester','exam_session','status','access_tier','price_minor'],sets=[],vals=[];
       for(const key of allowed)if(input[key]!==undefined){vals.push(input[key]);sets.push(key+'=$'+vals.length);}
       if(!sets.length){reply(res,400,{error:'No editable fields supplied.'});return true;}
       vals.push(idMatch[1]);const changed=await query('UPDATE documents SET '+sets.join(',')+',updated_at=NOW() WHERE id=$'+vals.length+' RETURNING id',vals);
