@@ -29,6 +29,9 @@ function loadEnv() {
 }
 loadEnv();
 
+// Load runtime services only after local environment variables are available.
+const handleCatalogApi = require('./db/api');
+
 const port = Number(process.env.PORT) || 3000;
 const root = process.env.VERCEL ? process.cwd() : __dirname;
 const dataDir = path.join(root, 'data');
@@ -538,6 +541,16 @@ async function handleRequest(request, response) {
 
         if (method === 'OPTIONS') {
             return send(response, 204, '');
+        }
+
+        // PostgreSQL + Cloudinary catalogue and administrator API.
+        if (await handleCatalogApi(request, response, pathname, requestUrl)) return;
+
+        // The first release is intentionally free-only. Keep payment infrastructure dormant.
+        if (pathname.startsWith('/api/mpesa/') || pathname === '/api/config' ||
+            pathname === '/api/orders' || pathname === '/api/payhero/channels' ||
+            pathname === '/api/student/purchases') {
+            return send(response, 410, { error: 'Payments are disabled for the free launch.' });
         }
 
         // Favicon handler
@@ -1377,9 +1390,9 @@ if (require.main === module) {
     server.listen(port, () => {
         console.log(`========================================================`);
         console.log(`Course Correct Student Portal : http://localhost:${port}`);
-        console.log(`Vendor & Admin Console : http://localhost:${port}/vender.html`);
+        console.log(`Admin Workspace        : http://localhost:${port}/admin.html`);
         console.log(`API Base               : http://localhost:${port}/api/materials`);
-        console.log(`M-Pesa Engine          : Third-Party Direct-to-Phone (PayHero, TinyPesa, IntaSend)`);
+        console.log(`Launch Mode            : Free academic resource library`);
         console.log(`========================================================`);
     });
 }

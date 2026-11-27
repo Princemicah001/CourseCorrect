@@ -1,86 +1,99 @@
-# Course — University Exam Resource Marketplace
+# CourseCorrect
 
-Course is Kenya's premier student exam resource portal, designed to give students instant access to revision materials, complete past examination papers, continuous assessment tests (CATs), and special/supplementary examinations with worked solutions and marking schemes.
+CourseCorrect is a mobile-first academic resource library for university students. It organises past papers, CATs, lecture notes, assignments, marking schemes and revision materials by institution, campus, school, course, unit and academic year.
 
----
+## Launch scope
 
-## Fixed Official Pricing Structure
+- All published documents are free to browse and download.
+- No checkout, payment prompt or payment provider is active in the launch experience.
+- The data model retains `access_tier` and `price_minor` for a future paid-access phase.
+- Student catalogue metadata is stored in PostgreSQL.
+- PDF documents are stored as raw assets in Cloudinary.
+- The administrator workspace is available at `/admin.html` (the legacy `/vender.html` path redirects there).
 
-In line with the brand guidelines, all academic resources are strictly priced as:
-* **Past Papers (End-of-Semester Examinations + Marking Schemes)**: **KES 200**
-* **CATS (Continuous Assessment Tests + Solutions)**: **KES 25**
-* **SPECIAL (Special & Supplementary Examinations + Examiner Rubrics)**: **KES 250**
+## Technology
 
----
+- Node.js 20+
+- PostgreSQL (Neon or another compatible hosted PostgreSQL provider)
+- Cloudinary raw asset storage for PDF files
+- Static HTML, CSS and browser JavaScript
+- Vercel deployment
 
-## Catalog & Folder-Based Document Architecture
+## Local setup
 
-Exam documents are catalogued and presented as interactive folders with their respective PDF files:
+1. Install dependencies:
 
-```
-Course/
-├── School of Computing & Informatics/
-│   ├── BCS 201: Data Structures and Algorithms/
-│   │   ├── [Folder] Past Papers (KES 200) -> BCS_201_Data_Structures_2024_Main_Exam.pdf
-│   │   ├── [Folder] CATS (KES 25) -> BCS_201_Data_Structures_CAT1_2024.pdf
-│   │   └── [Folder] Special Exams (KES 250) -> BCS_201_Data_Structures_Special_Exam_2024.pdf
-│   └── BIT 301: Database Management Systems/
-│       ├── [Folder] Past Papers (KES 200)
-│       ├── [Folder] CATS (KES 25)
-│       └── [Folder] Special Exams (KES 250)
-├── School of Business & Economics/
-│   ├── BBA 101: Financial Accounting I/
-│   └── BBA 304: Business Law & Commercial Practice/
-├── School of Engineering & Architecture/
-│   └── ENG 101: Engineering Mathematics I (Calculus)/
-├── School of Health & Biomedical Sciences/
-│   └── MED 201: Human Anatomy & Physiology/
-└── School of Law & Governance/
-    └── LAW 101: Constitutional Law of Kenya/
-```
+   ```bash
+   npm install
+   ```
 
-Every document item is backed by a genuine, verified PDF document in the `documents/` directory.
+2. Copy `.env.example` to `.env` and configure:
 
----
+   - `DATABASE_URL`: PostgreSQL connection string.
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`: Cloudinary server credentials.
+   - `ADMIN_EMAIL`, `ADMIN_PASSWORD`: initial administrator credentials.
 
-## Lipa Na M-Pesa Payment Pipeline & STK Push
+3. In Cloudinary Console, enable delivery of PDF and ZIP files for the product environment. Keep the API secret server-side.
 
-Course features a complete, direct M-Pesa STK Push payment pipeline:
+4. Apply the database schema:
 
-1. **One-Click STK Push / Multi-Item Cart Checkout**:
-   - Single item instant purchase or shopping cart bundle.
-   - Student enters their Safaricom phone number (e.g., `0712345678` or `0112345678`).
-2. **PayHero Kenya API v2 Integration (Direct to Phone / Till / Paybill)**:
-   - Endpoint: `POST https://backend.payhero.co.ke/api/v2/payments`
-   - Real STK Push directly to customer handset without requiring an expensive business shortcode.
-   - Live transaction polling via `GET https://backend.payhero.co.ke/api/v2/transactions?external_reference={orderId}`.
-   - Webhook callback receiver (`/api/mpesa/callback`) for asynchronous transaction confirmation.
-   - Channel detection: Supports Bank Paybill (e.g. NCBA LOOP) and Buy Goods Till numbers.
-3. **Interactive Phone STK Push Simulator & Fallback**:
-   - Built-in visual Safaricom SIM Toolkit simulator that replicates the phone prompt on-screen.
-   - Works immediately out-of-the-box in local development or offline test environments.
-4. **Immediate PDF Delivery & Receipt**:
-   - Real-time status update via polling & Server-Sent Events (SSE).
-   - Generates an official M-Pesa receipt number (e.g., `EE-SHB829128` or real Safaricom receipt like `UHHD73T4BC`).
-   - Issues a secure download token allowing the student to instantly view and download their verified PDF.
-5. **"My Downloads" Order Recovery**:
-   - Students can enter their phone number or receipt number anytime to re-download previously purchased exam papers.
+   ```bash
+   npm run db:migrate
+   ```
 
----
+5. Start the application:
 
-## Running Course
+   ```bash
+   npm start
+   ```
 
-Start the server:
-```bash
-npm start
-# or: node server.js
+- Student library: `http://localhost:3000`
+- Admin workspace: `http://localhost:3000/admin.html`
+
+The first successful administrator login bootstraps the owner account from `ADMIN_EMAIL` and `ADMIN_PASSWORD` if that email does not already exist in the `admins` table. Set those variables before the first login.
+
+## Catalogue structure
+
+```text
+University
+└── Campus
+    └── Faculty / School
+        └── Course / Programme
+            └── Unit
+                └── Academic year / semester
+                    └── Resource type
+                        └── PDF document
 ```
 
-- **Student Marketplace**: [http://localhost:3000](http://localhost:3000)
-- **Vendor / Admin Console**: [http://localhost:3000/vender.html](http://localhost:3000/vender.html)
-- **API Base**: [http://localhost:3000/api/materials](http://localhost:3000/api/materials)
+The public catalogue is returned in pages of up to 100 resources. The admin folder explorer groups records through the university, campus, faculty, course and unit hierarchy. The catalogue tables are relational rather than filesystem folders. Documents keep their Cloudinary asset identifiers and URLs in PostgreSQL. A university and its related catalogue records are created as administrators add resources.
 
-To regenerate catalog materials or add custom test PDFs:
-```bash
-node generate_catalog.js
-```
+## API overview
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/catalog` | Public, searchable published catalogue |
+| `GET /api/materials` | Compatibility alias for the public catalogue |
+| `POST /api/admin/login` | Administrator sign-in |
+| `GET /api/admin/me` | Current administrator session |
+| `POST /api/admin/logout` | End administrator session |
+| `POST /api/admin/upload-signature` | Generate a short-lived signed Cloudinary upload request |
+| `GET /api/admin/documents` | List catalogue documents |
+| `GET /api/admin/activity` | Review recent administrator actions |
+| `POST /api/admin/documents` | Save metadata for a verified Cloudinary PDF |
+| `PATCH /api/admin/documents/:id` | Edit document metadata or publication status |
+| `DELETE /api/admin/documents/:id` | Delete document metadata and its Cloudinary asset |
+| `GET /api/documents/:id/preview` | Open a published free PDF in the browser |
+| `GET /api/documents/:id/download` | Download a published free document |
+
+The legacy payment endpoints return HTTP 410 during the free launch.
+
+## Deployment
+
+Configure the same environment variables in Vercel. Run `npm run db:migrate` against the production PostgreSQL database before switching traffic to the new catalogue. The Vercel project should deploy the `redesign/free-launch` branch for review first; production promotion should happen only after environment configuration and end-to-end testing.
+
+## Notes
+
+- PDF uploads are capped at 20 MB by the admin interface and API validation.
+- The browser uploads the PDF directly to Cloudinary using a signature generated by the server. The Cloudinary API secret is never sent to the browser.
+- The database stores the catalogue hierarchy and document metadata; Cloudinary stores the binary PDF.
+- Existing JSON catalogues and local document files are not automatically imported by the schema migration. A separate, reviewed import process is needed if existing resources should be carried into the new catalogue.
