@@ -1,20 +1,24 @@
 {
-  "name": "course",
-  "version": "1.0.0",
-  "description": "Course - Kenya's Premier Exam Resource Hub with Instant M-Pesa STK Push",
+  "name": "coursecorrect",
+  "version": "2.0.0",
+  "description": "CourseCorrect — a university academic resource library",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node generate_catalog.js"
+    "seed": "node generate_catalog.js",
+    "db:migrate": "psql \"$DATABASE_URL\" -f db/schema.sql"
   },
   "keywords": [
-    "course",
+    "university",
     "past-papers",
-    "cats",
-    "mpesa",
-    "stk-push",
-    "daraja"
+    "academic-resources",
+    "postgresql",
+    "cloudinary"
   ],
-  "author": "Course Team",
-  "license": "ISC"
+  "author": "CourseCorrect",
+  "license": "ISC",
+  "dependencies": {
+    "cloudinary": "^2.7.0",
+    "pg": "^8.16.3"
+  }
 }
