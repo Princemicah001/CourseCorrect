@@ -544,6 +544,13 @@ async function handleRequest(request, response) {
         // PostgreSQL + Cloudinary catalogue and administrator API.
         if (await handleCatalogApi(request, response, pathname, requestUrl)) return;
 
+        // The first release is intentionally free-only. Keep payment infrastructure dormant.
+        if (pathname.startsWith('/api/mpesa/') || pathname === '/api/config' ||
+            pathname === '/api/orders' || pathname === '/api/payhero/channels' ||
+            pathname === '/api/student/purchases') {
+            return send(response, 410, { error: 'Payments are disabled for the free launch.' });
+        }
+
         // Favicon handler
         if (pathname === '/favicon.ico') {
             response.writeHead(204, {
