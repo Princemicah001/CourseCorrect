@@ -81,6 +81,7 @@ The catalogue tables are relational rather than filesystem folders. Documents ke
 | `POST /api/admin/documents` | Save metadata for a verified Cloudinary PDF |
 | `PATCH /api/admin/documents/:id` | Edit document metadata or publication status |
 | `DELETE /api/admin/documents/:id` | Delete document metadata and its Cloudinary asset |
+| `GET /api/documents/:id/preview` | Open a published free PDF in the browser |
 | `GET /api/documents/:id/download` | Download a published free document |
 
 The legacy payment endpoints return HTTP 410 during the free launch.
